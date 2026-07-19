@@ -30,9 +30,18 @@ Two consequences. First, frontmatter extraction is written defensively in-house 
 
 Note the limit of this decision: choosing YAML 1.2 for ourselves does not close the differential, because runtimes built on js-yaml still read 1.1. That is what the backlogged detection rule below is for.
 
+## 2026-07-19: Hidden-content rules scan the raw file, not parsed regions
+
+Raw-scope rules (all of PS2) run against the file text exactly as read, before parsing and regardless of whether parsing succeeds. Region parsing exists for structured rules only (permissions, metadata). The reason is a bypass that would otherwise be free: break the frontmatter on purpose, or pick delimiters our parser resolves differently from the runtime, and whatever fell out of our region model never gets scanned even though the model still reads it. A parse failure therefore reduces coverage for structured rules only; hidden-content scanning is unconditional.
+
+## 2026-07-19: Finding columns are UTF-16 code units
+
+Positions in findings count columns in UTF-16 code units, matching SARIF 2.1.0, where a run's `columnKind` defaults to `utf16CodeUnits` when absent. Recording this now so the Phase 4 SARIF emitter inherits a documented choice instead of an accident; if we ever emit `columnKind: unicodeCodePoints` the position math has to change with it.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: Phase 3). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
+- **PS2, ambiguous frontmatter boundaries** (target: Phase 3, same family as the YAML differential). Frontmatter whose region boundaries change depending on which delimiter conventions a parser accepts (`...` as a closer, delimiters after leading whitespace or BOM variants, `---` with trailing content) means different tools disagree on what is metadata and what is body. Boundary ambiguity is itself the finding, not a parsing detail: it only exists in a file when someone benefits from two readers seeing two different documents.
 
 ## 2026-07-19: Discovery defaults
 

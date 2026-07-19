@@ -1,0 +1,4 @@
+# Rule fixtures carry deliberate invisible characters and exact line endings.
+# Marking them -text stops git from ever normalizing or converting them; the
+# fixture integrity tests are the alarm, this is the lock.
+rules/**/fixtures/** -text
