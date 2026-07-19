@@ -2,9 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { parseSkill } from "../src/core/parse/skill.js";
 import { loadRules, type Rule } from "../src/core/rules.js";
-import { scanParsedSkill } from "../src/core/scan.js";
+import { scanArtifact } from "../src/core/scan.js";
 import type { ArtifactRef } from "../src/core/types.js";
 
 /**
@@ -25,10 +24,9 @@ function fixtureDir(rule: Rule): string {
 function scanFixture(rule: Rule, name: "vulnerable.md" | "safe.md") {
   const file = path.join(fixtureDir(rule), name);
   const ref: ArtifactRef = { type: "skill", path: file, relPath: name };
-  const parsed = parseSkill(ref, readFileSync(file, "utf8"));
-  expect(parsed.ok, `${rule.id}: fixture ${name} must parse`).toBe(true);
-  if (!parsed.ok) throw new Error("unreachable");
-  return scanParsedSkill(parsed.skill, [rule]).filter((f) => f.ruleId === rule.id);
+  const result = scanArtifact(ref, readFileSync(file, "utf8"), [rule]);
+  expect(result.failure, `${rule.id}: fixture ${name} must parse`).toBeUndefined();
+  return result.findings.filter((f) => f.ruleId === rule.id);
 }
 
 it("discovers at least one rule", () => {
