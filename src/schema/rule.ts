@@ -48,6 +48,11 @@ export const htmlCommentMatcherSchema = z.strictObject({
   phrases: z.array(z.string().min(1, "phrases must not be empty")).min(1, "list at least one phrase"),
 });
 
+export const homoglyphMatcherSchema = z.strictObject({
+  type: z.literal("homoglyph"),
+  field: z.string().min(1, "name the frontmatter field to check"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -55,6 +60,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   commandTokenMatcherSchema,
   frontmatterFieldMatcherSchema,
   htmlCommentMatcherSchema,
+  homoglyphMatcherSchema,
 ]);
 
 const prose = z

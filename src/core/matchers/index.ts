@@ -1,6 +1,7 @@
 import type { MatcherConfig } from "../../schema/rule.js";
 import { matchCommandToken } from "./command-token.js";
 import { matchFrontmatterField } from "./frontmatter-field.js";
+import { matchHomoglyph } from "./homoglyph.js";
 import { matchHtmlComment } from "./html-comment.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
@@ -40,5 +41,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return context.skill === null ? [] : matchFrontmatterField(context.skill, config);
     case "html-comment":
       return matchHtmlComment(context.source, config);
+    case "homoglyph":
+      return context.skill === null ? [] : matchHomoglyph(context.skill, config);
   }
 }
