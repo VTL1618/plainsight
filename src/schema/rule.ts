@@ -43,12 +43,18 @@ export const frontmatterFieldMatcherSchema = z.strictObject({
   equalsAny: z.array(z.string().min(1)).min(1, "list at least one disallowed value"),
 });
 
+export const htmlCommentMatcherSchema = z.strictObject({
+  type: z.literal("html-comment"),
+  phrases: z.array(z.string().min(1, "phrases must not be empty")).min(1, "list at least one phrase"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
   urlTokenMatcherSchema,
   commandTokenMatcherSchema,
   frontmatterFieldMatcherSchema,
+  htmlCommentMatcherSchema,
 ]);
 
 const prose = z

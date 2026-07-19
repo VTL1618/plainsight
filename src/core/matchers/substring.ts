@@ -1,3 +1,4 @@
+import { asciiFold } from "./case-fold.js";
 import type { MatcherMatch } from "./types.js";
 
 /**
@@ -38,15 +39,6 @@ export function matchSubstring(source: string, config: SubstringConfig): Matcher
   }
   matches.sort((a, b) => a.start - b.start);
   return matches;
-}
-
-function asciiFold(value: string): string {
-  let out = "";
-  for (let i = 0; i < value.length; i++) {
-    const code = value.charCodeAt(i);
-    out += code >= 65 && code <= 90 ? String.fromCharCode(code + 32) : value[i];
-  }
-  return out;
 }
 
 function renderDetail(matched: string): string {
