@@ -2,3 +2,7 @@
 # Marking them -text stops git from ever normalizing or converting them; the
 # fixture integrity tests are the alarm, this is the lock.
 rules/**/fixtures/** -text
+
+# Corpus files are byte-exact copies of third-party artifacts; their hashes
+# are recorded in tests/corpus/SOURCES.md and must survive git untouched.
+tests/corpus/** -text

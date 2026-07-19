@@ -15,7 +15,7 @@ export interface UnicodeRangeConfig {
   type: "unicode-range";
   ranges: CodepointRange[];
   /** Named allowlist applied to matched runs. */
-  allow?: "rgi-emoji-tag-sequences";
+  allow?: "rgi-emoji-tag-sequences" | undefined;
 }
 
 export interface MatcherMatch {
@@ -57,7 +57,7 @@ export function matchUnicodeRanges(source: string, config: UnicodeRangeConfig): 
   const flush = (end: number): void => {
     if (run.length === 0) return;
     if (!isAllowed(run, precedingCodepoint, config)) {
-      matches.push({ start: runStart, end, detail: renderDetail(run) });
+      matches.push({ start: runStart, end, detail: `hidden text decodes to: ${renderDetail(run)}` });
     }
     run = [];
   };
