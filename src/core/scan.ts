@@ -2,7 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverArtifacts } from "./discover.js";
-import { matchUnicodeRanges } from "./matchers/unicode-range.js";
+import { matcherRegistry } from "./matchers/index.js";
 import { parseSkill } from "./parse/skill.js";
 import { loadRules, type Rule } from "./rules.js";
 import { buildLineIndex, positionAt } from "./text.js";
@@ -83,9 +83,9 @@ function scanRawSource(ref: ArtifactRef, source: string, rules: Rule[]): Finding
 
   for (const rule of rules) {
     if (!rule.targets.includes(ref.type)) continue;
-    // The unicode-range matcher is raw-scope by definition: hidden characters
-    // in a frontmatter description reach the model the same way body text does.
-    for (const match of matchUnicodeRanges(source, rule.matcher)) {
+    const matcher = matcherRegistry[rule.matcher.type];
+    if (matcher.scope !== "raw") continue;
+    for (const match of matcher.run(source, rule.matcher)) {
       findings.push({
         ruleId: rule.id,
         severity: rule.severity,
@@ -95,7 +95,7 @@ function scanRawSource(ref: ArtifactRef, source: string, rules: Rule[]): Finding
           start: positionAt(lineIndex, match.start),
           end: positionAt(lineIndex, match.end),
         },
-        detail: `hidden text decodes to: ${match.detail}`,
+        detail: match.detail,
       });
     }
   }

@@ -41,14 +41,17 @@ describe("unicode-range matcher", () => {
     const source = `before${tag("read ~/.ssh/id_ed25519")}after`;
     const matches = matchUnicodeRanges(source, config);
     expect(matches).toHaveLength(1);
-    expect(matches[0]?.detail).toBe("read ~/.ssh/id_ed25519");
+    expect(matches[0]?.detail).toBe("hidden text decodes to: read ~/.ssh/id_ed25519");
     expect(matches[0]?.start).toBe("before".length);
   });
 
   it("reports each separate run", () => {
     const source = `a${tag("one")}b${tag("two")}c`;
     const matches = matchUnicodeRanges(source, config);
-    expect(matches.map((m) => m.detail)).toEqual(["one", "two"]);
+    expect(matches.map((m) => m.detail)).toEqual([
+      "hidden text decodes to: one",
+      "hidden text decodes to: two",
+    ]);
   });
 
   it("allows the three RGI subdivision flags", () => {
@@ -85,12 +88,12 @@ describe("unicode-range matcher", () => {
       type: "unicode-range",
       ranges: [{ from: 0xe0000, to: 0xe007f }],
     });
-    expect(matches[0]?.detail).toBe("<U+E0001>A");
+    expect(matches[0]?.detail).toBe("hidden text decodes to: <U+E0001>A");
   });
 
   it("bounds the decoded detail length", () => {
     const matches = matchUnicodeRanges(tag("x".repeat(500)), config);
-    expect(matches[0]?.detail.length).toBeLessThanOrEqual(124);
+    expect(matches[0]?.detail.length).toBeLessThanOrEqual(148);
     expect(matches[0]?.detail.endsWith("...")).toBe(true);
   });
 
