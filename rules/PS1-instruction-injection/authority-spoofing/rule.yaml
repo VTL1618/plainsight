@@ -12,8 +12,8 @@ rationale: >-
   override commands to the agent running it; that framing exists to borrow
   authority the file does not actually have.
 remediation: >-
-  Remove the fake authority markers. If the skill needs elevated behavior,
-  that belongs in an explicit, declared permission, not in text dressed up to
+  Remove the fake authority markers. If the skill needs broader access, that
+  belongs in an explicit, declared permission, not in text dressed up to
   look like a system message.
 references:
   - https://owasp.org/www-project-top-10-for-large-language-model-applications/
