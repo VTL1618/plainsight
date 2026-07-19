@@ -4,6 +4,10 @@
  * backtracking to worry about on hostile input.
  */
 
+import type { MatcherMatch } from "./types.js";
+
+export type { MatcherMatch };
+
 export interface CodepointRange {
   /** Inclusive first codepoint. */
   from: number;
@@ -16,15 +20,6 @@ export interface UnicodeRangeConfig {
   ranges: CodepointRange[];
   /** Named allowlist applied to matched runs. */
   allow?: "rgi-emoji-tag-sequences" | undefined;
-}
-
-export interface MatcherMatch {
-  /** UTF-16 offset of the first matched character. */
-  start: number;
-  /** UTF-16 offset just past the last matched character. */
-  end: number;
-  /** Printable rendering of the matched run, bounded in length. */
-  detail: string;
 }
 
 const BLACK_FLAG = 0x1f3f4;

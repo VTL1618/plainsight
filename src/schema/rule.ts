@@ -22,8 +22,16 @@ export const unicodeRangeMatcherSchema = z.strictObject({
   allow: z.literal("rgi-emoji-tag-sequences").optional(),
 });
 
-/** Grows into a discriminated union as matcher types are added. */
-export const matcherSchema = unicodeRangeMatcherSchema;
+export const substringMatcherSchema = z.strictObject({
+  type: z.literal("substring"),
+  phrases: z.array(z.string().min(1, "phrases must not be empty")).min(1, "list at least one phrase"),
+  caseSensitive: z.boolean().optional(),
+});
+
+export const matcherSchema = z.discriminatedUnion("type", [
+  unicodeRangeMatcherSchema,
+  substringMatcherSchema,
+]);
 
 const prose = z
   .string()
