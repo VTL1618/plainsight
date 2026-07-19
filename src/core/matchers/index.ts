@@ -1,5 +1,6 @@
 import type { MatcherConfig } from "../../schema/rule.js";
 import { matchCommandToken } from "./command-token.js";
+import { matchFrontmatterField } from "./frontmatter-field.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
 import type { MatcherMatch } from "./types.js";
@@ -34,5 +35,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return matchUrlToken(context.source);
     case "command-token":
       return matchCommandToken(context.source, config);
+    case "frontmatter-field":
+      return context.skill === null ? [] : matchFrontmatterField(context.skill, config);
   }
 }

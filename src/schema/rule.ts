@@ -37,11 +37,18 @@ export const commandTokenMatcherSchema = z.strictObject({
   detect: z.literal("pipe-to-shell"),
 });
 
+export const frontmatterFieldMatcherSchema = z.strictObject({
+  type: z.literal("frontmatter-field"),
+  field: z.string().min(1, "name the frontmatter field to check"),
+  equalsAny: z.array(z.string().min(1)).min(1, "list at least one disallowed value"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
   urlTokenMatcherSchema,
   commandTokenMatcherSchema,
+  frontmatterFieldMatcherSchema,
 ]);
 
 const prose = z

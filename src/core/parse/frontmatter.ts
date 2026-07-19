@@ -10,6 +10,8 @@ import YAML from "yaml";
 export interface FrontmatterBlock {
   /** The YAML text between the delimiters, exactly as it appears in the file. */
   raw: string;
+  /** UTF-16 offset in the original source where `raw` begins. */
+  rawOffset: number;
   /** Parsed value. Untrusted input, so no shape is assumed here. */
   data: unknown;
   /** 1-based line of the opening delimiter. */
@@ -71,13 +73,14 @@ export function extractDocument(source: string): ExtractedDocument {
 
     if (CLOSE_DELIMITER.test(lineText)) {
       const raw = afterBom.slice(open[0].length, lineStart);
+      const rawOffset = bomOffset + open[0].length;
       const bodyOffset = bomOffset + (newlineIndex === -1 ? afterBom.length : newlineIndex + 1);
       const parsed = parseYamlBlock(raw);
       return {
         frontmatter:
           parsed.kind === "error"
             ? parsed
-            : { kind: "ok", block: { raw, data: parsed.data, startLine: 1, endLine: line } },
+            : { kind: "ok", block: { raw, rawOffset, data: parsed.data, startLine: 1, endLine: line } },
         body: source.slice(bodyOffset),
         bodyStartLine: line + 1,
         bodyOffset,
