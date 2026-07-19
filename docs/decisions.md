@@ -38,6 +38,18 @@ Raw-scope rules (all of PS2) run against the file text exactly as read, before p
 
 Positions in findings count columns in UTF-16 code units, matching SARIF 2.1.0, where a run's `columnKind` defaults to `utf16CodeUnits` when absent. Recording this now so the Phase 4 SARIF emitter inherits a documented choice instead of an accident; if we ever emit `columnKind: unicodeCodePoints` the position math has to change with it.
 
+## 2026-07-20: Dependencies added in Phase 2
+
+`zod` validates rule.yaml at load time (specified in the project spec, §4). `tsx` is dev-only: the scaffolder and sweep scripts import the TypeScript engine directly, and tsx runs them without a build step. Neither touches the scan path at runtime.
+
+## 2026-07-20: Corpus policy
+
+The false-positive corpus vendors real, benign artifacts byte for byte. Conditions, all mandatory: MIT/Apache-2.0/BSD licenses only (no license grant means all rights reserved, never included); primary sources only, never aggregators; full license text vendored next to each artifact; SOURCES.md records source URL, pinned commit, and SHA-256 per file, verified by a test; no edits or reformatting, real mess is what catches broad rules. A corpus file that ever produces a critical or high finding is removed and handled through SECURITY.md coordinated disclosure, never left in the repo as an implicit accusation. Size stays small; breadth of coverage comes from the sweep tool instead.
+
+## 2026-07-20: Sweep tool for breadth, corpus for CI
+
+`npm run sweep` downloads skills from named public repos into a temp directory, scans them, prints an aggregate, and deletes the downloads. It never runs in CI (no network there, and runs must be reproducible) and never vendors anything. Committed sweep reports contain counts only: no repository names, no file paths, no content. Anything that looks like a real finding goes through coordinated disclosure.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: Phase 3). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
