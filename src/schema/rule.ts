@@ -32,10 +32,16 @@ export const urlTokenMatcherSchema = z.strictObject({
   type: z.literal("url-token"),
 });
 
+export const commandTokenMatcherSchema = z.strictObject({
+  type: z.literal("command-token"),
+  detect: z.literal("pipe-to-shell"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
   urlTokenMatcherSchema,
+  commandTokenMatcherSchema,
 ]);
 
 const prose = z

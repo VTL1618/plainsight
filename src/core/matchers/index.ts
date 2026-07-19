@@ -1,4 +1,5 @@
 import type { MatcherConfig } from "../../schema/rule.js";
+import { matchCommandToken } from "./command-token.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
 import type { MatcherMatch } from "./types.js";
@@ -31,5 +32,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return matchSubstring(context.source, config);
     case "url-token":
       return matchUrlToken(context.source);
+    case "command-token":
+      return matchCommandToken(context.source, config);
   }
 }
