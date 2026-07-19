@@ -1,0 +1,40 @@
+id: PS2-encoded-blob-execution
+category: PS2-hidden-content
+severity: critical
+title: Encoded blob with an instruction to run it
+description: >-
+  This file carries a long encoded blob and, right next to it, tells the agent
+  to decode and run it. The reviewer cannot read the blob, so whatever it does
+  is invisible until it executes. That is remote code execution smuggled past
+  review as gibberish.
+rationale: >-
+  A base64 payload is unreadable by design. On its own it might be sample data,
+  and the word "decode" on its own is harmless. Placed together, they hide the
+  real instruction inside an opaque string and ask the model to bring it to
+  life. The blob test looks for the mixed-character shape of base64 so that
+  hex checksums and URLs do not trip it.
+remediation: >-
+  Remove the blob, or replace it with the real content in plain sight so it can
+  be read and reviewed. A skill should never ask the agent to decode and run
+  something the author would not show directly.
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://cwe.mitre.org/data/definitions/506.html
+targets:
+  - skill
+matcher:
+  type: encoded-blob
+  decodeWords:
+    - "base64"
+    - "decode"
+    - "atob"
+    - "b64decode"
+    - "from_base64"
+  executeWords:
+    - "run"
+    - "execute"
+    - "eval"
+    - "exec"
+    - "bash"
+    - "sh -c"
+    - "invoke"

@@ -1,5 +1,6 @@
 import type { MatcherConfig } from "../../schema/rule.js";
 import { matchCommandToken } from "./command-token.js";
+import { matchEncodedBlob } from "./encoded-blob.js";
 import { matchFrontmatterField } from "./frontmatter-field.js";
 import { matchHomoglyph } from "./homoglyph.js";
 import { matchHtmlComment } from "./html-comment.js";
@@ -43,5 +44,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return matchHtmlComment(context.source, config);
     case "homoglyph":
       return context.skill === null ? [] : matchHomoglyph(context.skill, config);
+    case "encoded-blob":
+      return matchEncodedBlob(context.source, config);
   }
 }

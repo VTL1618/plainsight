@@ -53,6 +53,12 @@ export const homoglyphMatcherSchema = z.strictObject({
   field: z.string().min(1, "name the frontmatter field to check"),
 });
 
+export const encodedBlobMatcherSchema = z.strictObject({
+  type: z.literal("encoded-blob"),
+  decodeWords: z.array(z.string().min(1)).min(1, "list at least one decode word"),
+  executeWords: z.array(z.string().min(1)).min(1, "list at least one execute word"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -61,6 +67,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   frontmatterFieldMatcherSchema,
   htmlCommentMatcherSchema,
   homoglyphMatcherSchema,
+  encodedBlobMatcherSchema,
 ]);
 
 const prose = z
