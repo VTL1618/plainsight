@@ -1,0 +1,34 @@
+id: PS2-unicode-tag-block
+category: PS2-hidden-content
+severity: high
+title: Invisible Unicode tag characters
+description: >-
+  This file contains characters from the Unicode tag block (U+E0000 to
+  U+E007F). Nearly every editor and code review view renders them as nothing
+  at all, but a language model reads them as ordinary text. An attacker can
+  use them to hide instructions inside a skill that looks harmless to the
+  person approving it.
+rationale: >-
+  Tag characters mirror printable ASCII, shifted into an invisible plane of
+  the codespace. Text encoded this way passes human review unseen while
+  staying fully legible to the model. The one legitimate modern use is the
+  subdivision flag emoji for England, Scotland, and Wales; this rule
+  recognizes those exact sequences and stays quiet about them. A structurally
+  valid but made-up flag sequence still fires, because it renders as a plain
+  black flag while carrying hidden text.
+remediation: >-
+  Open the file in an editor that displays invisible characters and delete
+  the tag characters, or strip the range U+E0000 to U+E007F in a re-encoding
+  pass. Valid subdivision flag emoji are safe to keep and are not flagged.
+references:
+  - https://www.unicode.org/charts/PDF/UE0000.pdf
+  - https://www.unicode.org/reports/tr51/#def_emoji_tag_sequence
+  - https://arxiv.org/abs/2606.18198
+targets:
+  - skill
+matcher:
+  type: unicode-range
+  ranges:
+    - from: U+E0000
+      to: U+E007F
+  allow: rgi-emoji-tag-sequences
