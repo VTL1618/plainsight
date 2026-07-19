@@ -1,0 +1,35 @@
+id: PS2-zero-width-characters
+category: PS2-hidden-content
+severity: high
+title: Invisible zero-width characters
+description: >-
+  This file contains zero-width characters, which take up no space on screen
+  and are invisible to a reviewer, but a language model reads them as part of
+  the text. An attacker can use them to break up a suspicious phrase so a
+  keyword filter misses it, or to hide a word inside what looks like ordinary
+  writing.
+rationale: >-
+  A zero-width space or word joiner renders as nothing, so "ignore" spelled
+  with an invisible character in the middle still reads as "ignore" to the
+  model while sliding past both a human and a naive text filter. This rule
+  covers only the characters that have no ordinary use in skill text. Joiners
+  used by emoji families and by Persian and Indic scripts (U+200C, U+200D)
+  are deliberately not flagged, because a flat check cannot tell a smuggled
+  instruction from a legitimate flag or family emoji.
+remediation: >-
+  Open the file in an editor that reveals invisible characters and delete the
+  zero-width ones, or strip U+200B and the range U+2060 to U+2064 in a
+  re-encoding pass. If a zero-width character is load-bearing for a script,
+  that is itself worth a second look.
+references:
+  - https://www.unicode.org/charts/PDF/U2000.pdf
+  - https://arxiv.org/abs/2606.18198
+targets:
+  - skill
+matcher:
+  type: unicode-range
+  ranges:
+    - from: U+200B
+      to: U+200B
+    - from: U+2060
+      to: U+2064

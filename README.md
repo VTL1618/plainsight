@@ -2,7 +2,7 @@
 
 A static security scanner for the files that steer AI agents: skill definitions, MCP server configurations, hooks, and plugin manifests.
 
-**Status: early development.** The scanning pipeline works end to end with a single detection rule. No CLI yet, and nothing on npm. The sections below describe where this is going; everything shown as output is real.
+**Status: early development.** The engine runs end to end with 13 rules across all five skill-facing categories. No CLI yet, and nothing on npm. The sections below describe where this is going; everything shown as output is real.
 
 ## The problem
 
@@ -42,16 +42,16 @@ The hidden run is decoded right in the finding, so a reviewer sees exactly what 
 
 ## What it will detect
 
-Six rule categories, filled in over the coming releases:
+Six rule categories. Five are populated for skills today; PS6 lands with the MCP surface.
 
-| Category | Focus | Example |
+| Category | Focus | Rules today |
 |---|---|---|
-| PS1 | Instruction injection | "ignore previous instructions" phrasing in a skill body |
-| PS2 | Hidden content | invisible Unicode, instructions in HTML comments |
-| PS3 | Exfiltration primitives | credential paths encoded into outbound URLs |
-| PS4 | Permission escalation | a formatting skill requesting shell and network access |
-| PS5 | Supply chain | `curl \| bash` in bundled setup scripts |
-| PS6 | MCP configuration | secrets inline in `.mcp.json` |
+| PS1 | Instruction injection | override phrasing, spoofed system authority, hiding a step from the user |
+| PS2 | Hidden content | tag-block, zero-width, and bidi characters; comment-hidden instructions; look-alike names; decode-and-run blobs |
+| PS3 | Exfiltration primitives | reading a credential store, a secret interpolated into an outbound URL |
+| PS4 | Permission escalation | a skill requesting unrestricted tools |
+| PS5 | Supply chain | a download piped straight into a shell |
+| PS6 | MCP configuration | planned |
 
 ## What this does not catch
 

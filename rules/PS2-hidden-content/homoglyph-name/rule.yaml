@@ -1,0 +1,26 @@
+id: PS2-homoglyph-name
+category: PS2-hidden-content
+severity: high
+title: Look-alike characters in the skill name
+description: >-
+  This skill's name uses a letter from another alphabet that looks like a Latin
+  one. To a person the name reads as a familiar tool; to the machine it is a
+  different string. That mismatch is how a copycat skill gets picked up instead
+  of the real one.
+rationale: >-
+  A Cyrillic "а" or a Greek "ο" is pixel-for-pixel close to its Latin twin, so
+  "paypal-helper" and "pаypal-helper" look identical in a list while resolving
+  to different names. Skill names are meant to be plain ASCII slugs; a
+  look-alike letter in one has no honest reason to be there.
+remediation: >-
+  Rename the skill using plain Latin letters. If the name is supposed to be in
+  another language, that belongs in the description, not in the identifier
+  other tools match against.
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-42574
+  - https://www.unicode.org/reports/tr39/
+targets:
+  - skill
+matcher:
+  type: homoglyph
+  field: name

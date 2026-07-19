@@ -1,0 +1,29 @@
+id: PS4-wildcard-tools
+category: PS4-permission-escalation
+severity: high
+title: Skill requests unrestricted tools
+description: >-
+  This skill's frontmatter asks for every tool, or for shell access with no
+  limits. That hands the skill the run of the machine: it can execute any
+  command, read any file, and reach the network, no matter how small its
+  actual job is.
+rationale: >-
+  A tool grant of "*" means all tools, and a bare "Bash" entry means every
+  shell command with no argument restriction. A focused skill needs a focused
+  grant. Asking for everything is either careless or a setup for doing far
+  more than the skill claims to.
+remediation: >-
+  Replace the wildcard with the specific tools the skill uses, and scope Bash
+  to the exact commands it needs, for example Bash(git status:*). Grant the
+  least the skill can do its job with.
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://arxiv.org/abs/2603.22489
+targets:
+  - skill
+matcher:
+  type: frontmatter-field
+  field: allowed-tools
+  equalsAny:
+    - "*"
+    - "Bash"

@@ -1,0 +1,25 @@
+id: PS5-curl-pipe-to-shell
+category: PS5-supply-chain
+severity: critical
+title: Download piped straight into a shell
+description: >-
+  This file tells the agent to download something from the internet and run it
+  immediately, with no chance to read it first. Whoever controls that URL, or
+  anyone who takes it over later, controls what runs on the machine.
+rationale: >-
+  A command like curl into bash, or PowerShell's iex around a web request,
+  fetches code and executes it in one motion. The code is never shown, never
+  pinned, and can change after the skill is reviewed. It is a remote code
+  execution primitive handed to whoever owns the endpoint.
+remediation: >-
+  Download the script to a file first, read it, pin it to a known version or
+  checksum, and only then run it. Better still, install from a package manager
+  that verifies what it fetches.
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://cwe.mitre.org/data/definitions/494.html
+targets:
+  - skill
+matcher:
+  type: command-token
+  detect: pipe-to-shell

@@ -2,7 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverArtifacts } from "./discover.js";
-import { matcherRegistry } from "./matchers/index.js";
+import { runMatcher, type MatcherContext } from "./matchers/index.js";
 import { parseSkill } from "./parse/skill.js";
 import { loadRules, type Rule } from "./rules.js";
 import { buildLineIndex, positionAt } from "./text.js";
@@ -56,36 +56,23 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
 }
 
 /**
- * Scan one artifact. Raw-content rules run against the file text exactly as
- * read, before and regardless of parsing: a file whose frontmatter refuses to
- * parse still has every byte of it searched for hidden content. Otherwise a
- * deliberately broken frontmatter block would exempt the rest of the file
- * from scanning, which is exactly the kind of parser-differential bypass this
- * tool exists to catch. Structured rules (permissions, metadata) get the
- * parsed artifact, starting in Phase 2.
+ * Scan one artifact. Parsing always runs and its outcome always travels back
+ * in the result, but matchers do not wait on it: raw matchers read the file
+ * source directly, so a file whose frontmatter refuses to parse still has
+ * every byte searched for hidden content. A deliberately broken frontmatter
+ * block must never exempt the rest of the file from scanning, which is the
+ * parser-differential bypass this tool exists to catch. Structured matchers
+ * read the parsed skill and produce nothing when parsing failed.
  */
 export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): ArtifactScanResult {
-  const findings = scanRawSource(ref, source, rules);
-
   const parsed = parseSkill(ref, source);
-  if (!parsed.ok) {
-    return { findings, failure: parsed.failure };
-  }
-
-  // Structured rules will run here on parsed.skill once they exist.
-  return { findings };
-}
-
-/** Run every raw-scope rule over the unparsed file text. */
-function scanRawSource(ref: ArtifactRef, source: string, rules: Rule[]): Finding[] {
-  const findings: Finding[] = [];
+  const context: MatcherContext = { source, skill: parsed.ok ? parsed.skill : null };
   const lineIndex = buildLineIndex(source);
 
+  const findings: Finding[] = [];
   for (const rule of rules) {
     if (!rule.targets.includes(ref.type)) continue;
-    const matcher = matcherRegistry[rule.matcher.type];
-    if (matcher.scope !== "raw") continue;
-    for (const match of matcher.run(source, rule.matcher)) {
+    for (const match of runMatcher(context, rule.matcher)) {
       findings.push({
         ruleId: rule.id,
         severity: rule.severity,
@@ -100,7 +87,8 @@ function scanRawSource(ref: ArtifactRef, source: string, rules: Rule[]): Finding
     }
   }
 
-  return findings;
+  if (!parsed.ok) return { findings, failure: parsed.failure };
+  return { findings };
 }
 
 function defaultRulesDir(): string {

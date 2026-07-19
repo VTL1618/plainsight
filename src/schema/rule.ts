@@ -22,8 +22,53 @@ export const unicodeRangeMatcherSchema = z.strictObject({
   allow: z.literal("rgi-emoji-tag-sequences").optional(),
 });
 
-/** Grows into a discriminated union as matcher types are added. */
-export const matcherSchema = unicodeRangeMatcherSchema;
+export const substringMatcherSchema = z.strictObject({
+  type: z.literal("substring"),
+  phrases: z.array(z.string().min(1, "phrases must not be empty")).min(1, "list at least one phrase"),
+  caseSensitive: z.boolean().optional(),
+});
+
+export const urlTokenMatcherSchema = z.strictObject({
+  type: z.literal("url-token"),
+});
+
+export const commandTokenMatcherSchema = z.strictObject({
+  type: z.literal("command-token"),
+  detect: z.literal("pipe-to-shell"),
+});
+
+export const frontmatterFieldMatcherSchema = z.strictObject({
+  type: z.literal("frontmatter-field"),
+  field: z.string().min(1, "name the frontmatter field to check"),
+  equalsAny: z.array(z.string().min(1)).min(1, "list at least one disallowed value"),
+});
+
+export const htmlCommentMatcherSchema = z.strictObject({
+  type: z.literal("html-comment"),
+  phrases: z.array(z.string().min(1, "phrases must not be empty")).min(1, "list at least one phrase"),
+});
+
+export const homoglyphMatcherSchema = z.strictObject({
+  type: z.literal("homoglyph"),
+  field: z.string().min(1, "name the frontmatter field to check"),
+});
+
+export const encodedBlobMatcherSchema = z.strictObject({
+  type: z.literal("encoded-blob"),
+  decodeWords: z.array(z.string().min(1)).min(1, "list at least one decode word"),
+  executeWords: z.array(z.string().min(1)).min(1, "list at least one execute word"),
+});
+
+export const matcherSchema = z.discriminatedUnion("type", [
+  unicodeRangeMatcherSchema,
+  substringMatcherSchema,
+  urlTokenMatcherSchema,
+  commandTokenMatcherSchema,
+  frontmatterFieldMatcherSchema,
+  htmlCommentMatcherSchema,
+  homoglyphMatcherSchema,
+  encodedBlobMatcherSchema,
+]);
 
 const prose = z
   .string()

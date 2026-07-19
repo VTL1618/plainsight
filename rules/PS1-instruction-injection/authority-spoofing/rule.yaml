@@ -1,0 +1,29 @@
+id: PS1-authority-spoofing
+category: PS1-instruction-injection
+severity: high
+title: Spoofed system or admin authority
+description: >-
+  This file plants text that pretends to be a high-authority system or admin
+  message. The goal is to make the agent treat an attacker's line as if it
+  came from a privileged source and follow it without the usual checks.
+rationale: >-
+  Markers like "[ADMIN OVERRIDE]" or "SYSTEM OVERRIDE:" impersonate a channel
+  the model is trained to trust. A skill has no reason to issue system-level
+  override commands to the agent running it; that framing exists to borrow
+  authority the file does not actually have.
+remediation: >-
+  Remove the fake authority markers. If the skill needs broader access, that
+  belongs in an explicit, declared permission, not in text dressed up to
+  look like a system message.
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://arxiv.org/abs/2603.22489
+targets:
+  - skill
+matcher:
+  type: substring
+  phrases:
+    - "[ADMIN OVERRIDE]"
+    - "[SYSTEM OVERRIDE]"
+    - "ADMIN OVERRIDE:"
+    - "SYSTEM OVERRIDE:"
