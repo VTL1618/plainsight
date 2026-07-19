@@ -53,7 +53,7 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
   return { findings, failures };
 }
 
-/** Run every applicable rule against one parsed skill. Exported for the fixture test harness. */
+/** Run every applicable rule against one parsed skill. Exported for the fixture tests. */
 export function scanParsedSkill(skill: ParsedSkill, rules: Rule[]): Finding[] {
   const findings: Finding[] = [];
   const lineIndex = buildLineIndex(skill.source);
