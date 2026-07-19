@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "new-rule": "tsx scripts/new-rule.ts",
+    "sweep": "tsx scripts/sweep.ts"
   },
   "repository": {
     "type": "git",
