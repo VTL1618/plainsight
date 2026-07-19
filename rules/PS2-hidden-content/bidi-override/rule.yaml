@@ -1,0 +1,33 @@
+id: PS2-bidi-override
+category: PS2-hidden-content
+severity: high
+title: Bidirectional override characters
+description: >-
+  This file contains bidirectional control characters that reorder how text
+  displays without changing the order the model reads. A reviewer sees the
+  text one way, the model reads it another. This is the Trojan Source trick,
+  and it lets an attacker show a harmless-looking line while the model
+  receives a different instruction.
+rationale: >-
+  Override and isolate characters (U+202A to U+202E, U+2066 to U+2069) tell a
+  display engine to flip the visual order of the characters around them. A
+  line that looks like a comment on screen can carry a live instruction in
+  logical order, or the other way around. Normal right-to-left text in Arabic
+  or Hebrew does not need these explicit overrides; their presence in a skill
+  is a strong signal that display and meaning were pulled apart on purpose.
+remediation: >-
+  Remove the override characters. If the file genuinely mixes left-to-right
+  and right-to-left text, rely on the natural direction of the letters, which
+  does not require these control characters.
+references:
+  - https://www.unicode.org/reports/tr9/
+  - https://nvd.nist.gov/vuln/detail/CVE-2021-42574
+targets:
+  - skill
+matcher:
+  type: unicode-range
+  ranges:
+    - from: U+202A
+      to: U+202E
+    - from: U+2066
+      to: U+2069
