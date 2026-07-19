@@ -1,0 +1,47 @@
+{
+  "name": "plainsight",
+  "version": "0.0.0",
+  "description": "Static security scanner for AI agent artifacts: skills, MCP configs, hooks, plugin manifests.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "rules"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VTL1618/plainsight.git"
+  },
+  "keywords": [
+    "security",
+    "static-analysis",
+    "ai-agents",
+    "prompt-injection",
+    "claude-skills",
+    "mcp",
+    "sarif"
+  ],
+  "dependencies": {
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^20.19.0",
+    "eslint": "^9.30.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^3.2.0"
+  }
+}
