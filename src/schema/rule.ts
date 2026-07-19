@@ -28,9 +28,14 @@ export const substringMatcherSchema = z.strictObject({
   caseSensitive: z.boolean().optional(),
 });
 
+export const urlTokenMatcherSchema = z.strictObject({
+  type: z.literal("url-token"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
+  urlTokenMatcherSchema,
 ]);
 
 const prose = z

@@ -3,6 +3,7 @@ import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
 import type { MatcherMatch } from "./types.js";
 import { matchUnicodeRanges } from "./unicode-range.js";
+import { matchUrlToken } from "./url-token.js";
 
 /**
  * The matcher registry. rule.yaml names a matcher; this dispatch supplies the
@@ -28,5 +29,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return matchUnicodeRanges(context.source, config);
     case "substring":
       return matchSubstring(context.source, config);
+    case "url-token":
+      return matchUrlToken(context.source);
   }
 }

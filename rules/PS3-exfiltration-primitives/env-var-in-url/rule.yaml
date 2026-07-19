@@ -1,0 +1,25 @@
+id: PS3-env-var-in-url
+category: PS3-exfiltration-primitives
+severity: critical
+title: Secret interpolated into an outbound URL
+description: >-
+  This file builds a URL with an environment variable dropped inside it. Since
+  environment variables usually hold secrets like API keys, and opening the
+  URL sends whatever it contains to the far end, this is a working way to leak
+  a secret off the machine in a single step.
+rationale: >-
+  Putting $ANTHROPIC_API_KEY or ${TOKEN} into a request URL is the documented
+  exfiltration pattern: the secret rides along in the query string, and the
+  moment the agent fetches the link, the value is gone. A variable used in a
+  code sample is fine; a variable placed inside a URL is the whole attack.
+remediation: >-
+  Never put a secret in a URL. Send credentials in a request header over a
+  connection you control, and if the skill has no real reason to make an
+  outbound call, remove it.
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://arxiv.org/abs/2606.18198
+targets:
+  - skill
+matcher:
+  type: url-token
