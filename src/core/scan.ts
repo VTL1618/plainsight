@@ -22,6 +22,8 @@ export interface ScanResult {
   failures: ParseFailure[];
   /** The rules the scan ran, so reporters can look up prose and help URIs by ruleId. */
   rules: Rule[];
+  /** Number of artifacts discovered and scanned, for the report summary. */
+  scanned: number;
 }
 
 export interface ArtifactScanResult {
@@ -54,7 +56,7 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
     if (result.failure) failures.push(result.failure);
   }
 
-  return { findings, failures, rules };
+  return { findings, failures, rules, scanned: refs.length };
 }
 
 /**
