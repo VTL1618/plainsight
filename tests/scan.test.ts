@@ -46,6 +46,9 @@ describe("scan", () => {
     // The hidden run sits at the end of the "group in one sentence." line.
     expect(finding?.range.start.line).toBe(9);
     expect(finding?.range.start.column).toBe("group in one sentence.".length + 1);
+
+    // The result carries the rules so reporters can look up prose by ruleId.
+    expect(result.rules.some((r) => r.id === "PS2-unicode-tag-block")).toBe(true);
   });
 
   it("stays quiet on a skill whose only tag characters are real flag emoji", async () => {

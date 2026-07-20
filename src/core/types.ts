@@ -23,16 +23,20 @@ export interface Range {
   end: Position;
 }
 
+/**
+ * One match. A finding carries only what is specific to this hit; the rule's
+ * prose (title, description, remediation, help URI) lives once in the rule and
+ * is looked up by ruleId when reporting. Severity is resolved from the rule
+ * and kept here because filtering and exit codes read it constantly.
+ */
 export interface Finding {
   ruleId: string;
   severity: Severity;
-  /** What the pattern means and what an attacker gets from it. Plain language. */
-  message: string;
   /** Path relative to the scan root. */
   path: string;
   range: Range;
-  /** Per-match context, always printable. Invisible content appears here decoded or escaped. */
-  detail?: string;
+  /** Printable, bounded evidence for this hit. Invisible content is decoded or escaped here. */
+  detail: string;
 }
 
 /**
