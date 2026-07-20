@@ -94,6 +94,6 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
   return { findings };
 }
 
-function defaultRulesDir(): string {
+export function defaultRulesDir(): string {
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../rules");
 }
