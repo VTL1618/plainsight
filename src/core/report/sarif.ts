@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { fingerprintAll, FINGERPRINT_KEY, UNPARSEABLE_RULE_ID } from "../fingerprint.js";
 import type { Rule } from "../rules.js";
 import type { ScanResult } from "../scan.js";
 import { toSarifLevel, type SarifLevel } from "../severity.js";
@@ -15,10 +15,6 @@ import type { Finding, ParseFailure, Severity } from "../types.js";
 const SCHEMA_URI =
   "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json";
 const DEFAULT_INFO_URI = "https://github.com/VTL1618/plainsight";
-const FINGERPRINT_KEY = "plainsight/v1";
-
-/** Reserved rule for files that could not be parsed; not a PS-category rule. */
-const UNPARSEABLE_RULE_ID = "plainsight-unparseable-artifact";
 
 /** GitHub reads this numeric property to rank severity in the Security tab. */
 const SECURITY_SEVERITY: Record<Severity, string> = {
@@ -85,17 +81,17 @@ export function toSarif(result: ScanResult, options: SarifOptions = {}): SarifLo
     descriptors.push(unparseableDescriptor());
   }
 
-  const seen = new Map<string, number>();
+  const fingerprints = fingerprintAll(result.findings, result.failures);
   const results: SarifResult[] = [];
 
-  for (const finding of result.findings) {
+  result.findings.forEach((finding, i) => {
     const index = ruleIndex.get(finding.ruleId);
-    if (index === undefined) continue; // a finding must reference a loaded rule
-    results.push(findingResult(finding, index, seen));
-  }
-  for (const failure of result.failures) {
-    results.push(failureResult(failure, unparseableIndex, seen));
-  }
+    if (index === undefined) return; // a finding must reference a loaded rule
+    results.push(findingResult(finding, index, fingerprints.findings[i] ?? ""));
+  });
+  result.failures.forEach((failure, i) => {
+    results.push(failureResult(failure, unparseableIndex, fingerprints.failures[i] ?? ""));
+  });
 
   return {
     $schema: SCHEMA_URI,
@@ -133,7 +129,7 @@ function unparseableDescriptor(): SarifReportingDescriptor {
   };
 }
 
-function findingResult(finding: Finding, index: number, seen: Map<string, number>): SarifResult {
+function findingResult(finding: Finding, index: number, fingerprint: string): SarifResult {
   return {
     ruleId: finding.ruleId,
     ruleIndex: index,
@@ -152,30 +148,17 @@ function findingResult(finding: Finding, index: number, seen: Map<string, number
         },
       },
     ],
-    partialFingerprints: { [FINGERPRINT_KEY]: fingerprint(finding.ruleId, finding.path, finding.detail, seen) },
+    partialFingerprints: { [FINGERPRINT_KEY]: fingerprint },
   };
 }
 
-function failureResult(failure: ParseFailure, index: number, seen: Map<string, number>): SarifResult {
+function failureResult(failure: ParseFailure, index: number, fingerprint: string): SarifResult {
   return {
     ruleId: UNPARSEABLE_RULE_ID,
     ruleIndex: index,
     level: "warning",
     message: { text: failure.reason },
     locations: [{ physicalLocation: { artifactLocation: { uri: failure.path } } }],
-    partialFingerprints: { [FINGERPRINT_KEY]: fingerprint(UNPARSEABLE_RULE_ID, failure.path, failure.reason, seen) },
+    partialFingerprints: { [FINGERPRINT_KEY]: fingerprint },
   };
-}
-
-/**
- * Stable identity for an alert. Built from the rule, the file, and the match
- * text, never from line numbers, so editing elsewhere in the file keeps the
- * same fingerprint. An occurrence ordinal keeps two identical matches in one
- * file distinct instead of collapsing them.
- */
-function fingerprint(ruleId: string, path: string, detail: string, seen: Map<string, number>): string {
-  const base = `${ruleId}\n${path}\n${detail}`;
-  const ordinal = seen.get(base) ?? 0;
-  seen.set(base, ordinal + 1);
-  return createHash("sha256").update(`${base}\n${String(ordinal)}`).digest("hex").slice(0, 16);
 }
