@@ -1,5 +1,5 @@
-/** Artifact kinds the scanner understands. Grows in later phases (mcp-config, hooks, ...). */
-export type ArtifactType = "skill";
+/** Artifact kinds the scanner understands. Grows in later phases (marketplace-manifest, hooks, ...). */
+export type ArtifactType = "skill" | "mcp-config";
 
 /** A scannable file found by discovery. */
 export interface ArtifactRef {
