@@ -110,6 +110,10 @@ The README carries two: CI status (GitHub's own workflow badge) and npm version 
 
 A badge for other repositories: a registry or skill author whose tree scans clean puts it in their README. This is a distribution mechanism, not decoration. Registries like adding badges, and every repository that displays one advertises the tool to exactly the audience that should adopt it. The claim has to stay honest to work: tied to a scanner version and a scan date, something like "scanned with plainsight vX, 0 findings at high or above", never an open-ended "safe". Implementation lands with the Phase 6 registry-facing work.
 
+## 2026-07-20: Self-scan gates on the scan, not on the SARIF upload
+
+The self-scan workflow's build gate is the scan step's exit code. Uploading the result to the Security tab is a separate, best-effort step marked `continue-on-error: true`. Code scanning is free on public repositories but off on private ones without Advanced Security, and it is never available to fork PRs, so a hard dependency on it would turn a passing scan red for a reason that has nothing to do with the code. The workflow is also a template other people copy into their own repositories, many private, so failing soft on the upload is the right default. The tradeoff: a genuine upload failure on a public repository no longer reddens CI. That is acceptable because the SARIF is schema-validated in tests before it is ever emitted, and the upload carries visibility, not the gate.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
