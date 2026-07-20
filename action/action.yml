@@ -1,0 +1,67 @@
+# Composite on purpose: no committed dist, no bundle. Everything that runs in
+# your CI is readable TypeScript at the ref you pinned, built here from the
+# committed lockfile. See docs/decisions.md for the reasoning.
+name: plainsight
+author: VTL1618
+description: >-
+  Scan AI agent artifacts (skills, MCP configs, hooks, plugin manifests) for
+  hidden instructions and injection attacks. Writes a SARIF report for GitHub
+  code scanning.
+branding:
+  icon: eye
+  color: purple
+
+inputs:
+  path:
+    description: Directory to scan, relative to the workspace.
+    required: false
+    default: "."
+  sarif-file:
+    description: Where to write the SARIF report.
+    required: false
+    default: plainsight.sarif
+  fail-on:
+    description: "Lowest severity that fails the step: critical, high, medium, low, or never."
+    required: false
+    default: high
+  baseline:
+    description: Path to a baseline file of accepted findings, written by `plainsight baseline`.
+    required: false
+    default: ""
+
+outputs:
+  sarif-file:
+    description: Path of the SARIF report, for a following upload-sarif step.
+    value: ${{ inputs.sarif-file }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 20
+
+    - name: Build plainsight from this ref
+      shell: bash
+      working-directory: ${{ github.action_path }}/..
+      run: |
+        npm ci --ignore-scripts
+        npm run build
+        node dist/cli/bin.js --version
+
+    # Inputs reach the shell through env, never through template interpolation
+    # inside the script, so a crafted input cannot inject shell syntax.
+    - name: Scan
+      shell: bash
+      env:
+        PS_PATH: ${{ inputs.path }}
+        PS_SARIF: ${{ inputs.sarif-file }}
+        PS_FAIL_ON: ${{ inputs.fail-on }}
+        PS_BASELINE: ${{ inputs.baseline }}
+        PS_CLI: ${{ github.action_path }}/../dist/cli/bin.js
+      run: |
+        args=(scan "$PS_PATH" --format sarif --fail-on "$PS_FAIL_ON")
+        if [ -n "$PS_BASELINE" ]; then
+          args+=(--baseline "$PS_BASELINE")
+        fi
+        node "$PS_CLI" "${args[@]}" > "$PS_SARIF"

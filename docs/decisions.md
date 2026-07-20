@@ -90,6 +90,14 @@ The zero-config default is human-readable terminal output (CLAUDE.md §2); SARIF
 
 The build is `tsc` into `dist/`, no bundler. Path resolution already treats the package root as two directories up from the running module, so compiled output finds `rules/` and `package.json` without changes; a bundler would break that for zero benefit. Rule fixtures are excluded from the npm tarball: the engine reads only `rule.yaml`, and shipping files full of deliberate attack strings into every user's `node_modules` invites noise from other scanners. A pack smoke script (`scripts/pack-smoke.sh`, run in CI) installs the real tarball into a clean directory and exercises the CLI, because the tree working under tsx proves nothing about the published package.
 
+## 2026-07-20: The GitHub Action is composite and builds from source
+
+The action wrapper is a composite action: it runs `npm ci --ignore-scripts` against the committed lockfile at whatever ref the user pinned, compiles the TypeScript, and runs the compiled CLI. No dist is committed, which deviates from the §7 sketch (`action.yml + dist`) on purpose.
+
+The registry is not the argument. `npm ci` on the runner pulls the same dependencies from the same registry, just at run time instead of install time; integrity comes from the lockfile either way. The argument is readability. This tool's entire pitch is that it finds what a person cannot see, and a committed bundle of minified build output is exactly the kind of unreviewable blob we tell users not to trust. Composite keeps every line that runs in a user's CI readable in the repository. That is the product thesis applied to ourselves, not just supply-chain hygiene.
+
+Implementation requirements: strict lockfile install with `--ignore-scripts`, every action referenced by the wrapper pinned to a commit SHA, action inputs passed to the shell through env rather than template interpolation. The cost is roughly half a minute of install-and-build per run; the fast path is `npx plainsight@<version>`, documented in the README.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
