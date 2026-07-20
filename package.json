@@ -7,11 +7,21 @@
   "engines": {
     "node": ">=20"
   },
+  "bin": {
+    "plainsight": "dist/cli/bin.js"
+  },
   "files": [
     "dist",
-    "rules"
+    "rules",
+    "!rules/**/fixtures"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
@@ -23,6 +33,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VTL1618/plainsight.git"
+  },
+  "homepage": "https://github.com/VTL1618/plainsight#readme",
+  "bugs": {
+    "url": "https://github.com/VTL1618/plainsight/issues"
   },
   "keywords": [
     "security",
@@ -40,6 +54,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@eslint/js": "^9.30.0",
     "@types/mdast": "^4.0.4",
     "@types/node": "^20.19.0",

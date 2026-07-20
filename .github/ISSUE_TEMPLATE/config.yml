@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/VTL1618/plainsight/blob/main/SECURITY.md
+    about: Coordinated disclosure through SECURITY.md, never a public issue.

@@ -86,6 +86,34 @@ The baseline is a versioned JSON file, `{ "version": 1, "fingerprints": [...] }`
 
 The zero-config default is human-readable terminal output (CLAUDE.md §2); SARIF and JSON are opt-in via `--format`. Color is decided from `--color`/`--no-color`, then `NO_COLOR`/`FORCE_COLOR`, then whether stdout is a TTY, so piped output is clean. `ajv` plus `ajv-draft-04` and `ajv-formats` are dev-only, used to validate emitted SARIF against the vendored official 2.1.0 schema (draft-04) offline in tests. They never load in the scan path.
 
+## 2026-07-20: Packaging is plain tsc, fixtures stay out of the tarball
+
+The build is `tsc` into `dist/`, no bundler. Path resolution already treats the package root as two directories up from the running module, so compiled output finds `rules/` and `package.json` without changes; a bundler would break that for zero benefit. Rule fixtures are excluded from the npm tarball: the engine reads only `rule.yaml`, and shipping files full of deliberate attack strings into every user's `node_modules` invites noise from other scanners. A pack smoke script (`scripts/pack-smoke.sh`, run in CI) installs the real tarball into a clean directory and exercises the CLI, because the tree working under tsx proves nothing about the published package.
+
+## 2026-07-20: The GitHub Action is composite and builds from source
+
+The action wrapper is a composite action: it runs `npm ci --ignore-scripts` against the committed lockfile at whatever ref the user pinned, compiles the TypeScript, and runs the compiled CLI. No dist is committed, which deviates from the §7 sketch (`action.yml + dist`) on purpose.
+
+The registry is not the argument. `npm ci` on the runner pulls the same dependencies from the same registry, just at run time instead of install time; integrity comes from the lockfile either way. The argument is readability. This tool's entire pitch is that it finds what a person cannot see, and a committed bundle of minified build output is exactly the kind of unreviewable blob we tell users not to trust. Composite keeps every line that runs in a user's CI readable in the repository. That is the product thesis applied to ourselves, not just supply-chain hygiene.
+
+Implementation requirements: strict lockfile install with `--ignore-scripts`, every action referenced by the wrapper pinned to a commit SHA, action inputs passed to the shell through env rather than template interpolation. The cost is roughly half a minute of install-and-build per run; the fast path is `npx plainsight@<version>`, documented in the README.
+
+## 2026-07-20: Release automation is changesets plus npm trusted publishing
+
+`@changesets/cli` (dev-only, specified in §4) manages versions and changelogs: a PR carries a changeset, a bot PR accumulates them, merging that publishes. Publishing goes through npm trusted publishing over OIDC with provenance, so no npm token exists in the repository or its secrets, and every published version is attestable back to a commit and workflow run. Two steps stay manual by nature: the very first publish (npm cannot configure a trusted publisher for a package that does not exist yet) and the one-time trusted-publisher configuration on npmjs.com. Both are written out step by step in docs/RELEASING.md.
+
+## 2026-07-20: README badges
+
+The README carries two: CI status (GitHub's own workflow badge) and npm version (shields.io). The npm badge renders as "not found" until the first publish and fixes itself after; that is honest, so it ships now.
+
+## Backlog: a "scanned with plainsight" badge (Phase 6)
+
+A badge for other repositories: a registry or skill author whose tree scans clean puts it in their README. This is a distribution mechanism, not decoration. Registries like adding badges, and every repository that displays one advertises the tool to exactly the audience that should adopt it. The claim has to stay honest to work: tied to a scanner version and a scan date, something like "scanned with plainsight vX, 0 findings at high or above", never an open-ended "safe". Implementation lands with the Phase 6 registry-facing work.
+
+## 2026-07-20: Self-scan gates on the scan, not on the SARIF upload
+
+The self-scan workflow's build gate is the scan step's exit code. Uploading the result to the Security tab is a separate, best-effort step marked `continue-on-error: true`. Code scanning is free on public repositories but off on private ones without Advanced Security, and it is never available to fork PRs, so a hard dependency on it would turn a passing scan red for a reason that has nothing to do with the code. The workflow is also a template other people copy into their own repositories, many private, so failing soft on the upload is the right default. The tradeoff: a genuine upload failure on a public repository no longer reddens CI. That is acceptable because the SARIF is schema-validated in tests before it is ever emitted, and the upload carries visibility, not the gate.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
