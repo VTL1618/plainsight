@@ -20,6 +20,10 @@ export interface ScanResult {
    * log line: a file the scanner cannot parse is a file nobody has vetted.
    */
   failures: ParseFailure[];
+  /** The rules the scan ran, so reporters can look up prose and help URIs by ruleId. */
+  rules: Rule[];
+  /** Number of artifacts discovered and scanned, for the report summary. */
+  scanned: number;
 }
 
 export interface ArtifactScanResult {
@@ -52,7 +56,7 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
     if (result.failure) failures.push(result.failure);
   }
 
-  return { findings, failures };
+  return { findings, failures, rules, scanned: refs.length };
 }
 
 /**
@@ -76,7 +80,6 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
       findings.push({
         ruleId: rule.id,
         severity: rule.severity,
-        message: rule.description,
         path: ref.relPath,
         range: {
           start: positionAt(lineIndex, match.start),
@@ -91,6 +94,6 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
   return { findings };
 }
 
-function defaultRulesDir(): string {
+export function defaultRulesDir(): string {
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../rules");
 }

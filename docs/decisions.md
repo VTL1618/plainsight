@@ -62,6 +62,30 @@ Where regex was the obvious tool, two narrow matchers replaced it: `url-token` (
 
 Every matcher declares what it reads. Raw matchers (`unicode-range`, `substring`, `url-token`, `command-token`, `html-comment`, `encoded-blob`) read the file source and run even when the frontmatter failed to parse, so hidden content in a file that defeats the parser is still found. Structured matchers (`frontmatter-field`, `homoglyph`) read the parsed skill and produce nothing when parsing failed. Detection in the structured matchers runs on the parsed value, immune to quoting and spacing tricks; only the reported position is recovered from the raw text.
 
+## 2026-07-20: Findings carry match data, rules carry prose
+
+A finding used to carry a copy of its rule's description. That is the wrong model for SARIF, where rule prose belongs once in `tool.driver.rules` and a result's message is the specific match. Findings now hold `ruleId`, `severity`, `path`, `range`, and the match-specific `detail`; the scan result carries the rule list so reporters look up title, description, remediation, and help URI by id. Severity stays denormalized on the finding because filtering and exit codes read it on every finding.
+
+## 2026-07-20: One fingerprint definition, no line numbers
+
+`src/core/fingerprint.ts` is the single definition of a finding's identity, used by both the SARIF emitter and the baseline. It hashes the rule id, the file path, and the match text, plus an occurrence ordinal to keep two identical matches in one file distinct. Line numbers are deliberately excluded so an edit above a finding does not change its identity and re-alert it (CLAUDE.md §5). Removing a duplicate match can shift the ordinal of the one that remains; that is an accepted edge, since the file changed.
+
+## 2026-07-20: Parse failures are warning-level SARIF results
+
+An unparseable artifact is surfaced, not swallowed, and it appears as a SARIF result (level `warning`) under a reserved rule `plainsight-unparseable-artifact`, so it shows up in the Security tab where a reviewer will see it. It does not gate a build by default, because a malformed file is often a plain mistake, but it is visible because malformed frontmatter can also be a bypass attempt.
+
+## 2026-07-20: Exit-code policy
+
+`scan` exits 0 when clean, 1 when a finding at or above the fail-on floor survives filtering, and 2 on a usage or runtime error (bad path, unreadable baseline, invalid flag). Code 2 is distinct so CI can tell "found a problem" from "the scanner broke". The fail-on floor defaults to `high`, so only critical and high gate a build (CLAUDE.md §3). Order is fixed and tested: scan, then baseline suppression, then `--min-severity` filter, then the exit-code decision on what remains.
+
+## 2026-07-20: Baseline format
+
+The baseline is a versioned JSON file, `{ "version": 1, "fingerprints": [...] }`, written to `.plainsight-baseline.json` by default. It is a committed public contract, so the shape is versioned and the fingerprints are exactly the ones the SARIF output carries. A team adopts the tool on an existing repo by baselining current findings and still catches new ones.
+
+## 2026-07-20: Default output is pretty; ajv is dev-only
+
+The zero-config default is human-readable terminal output (CLAUDE.md §2); SARIF and JSON are opt-in via `--format`. Color is decided from `--color`/`--no-color`, then `NO_COLOR`/`FORCE_COLOR`, then whether stdout is a TTY, so piped output is clean. `ajv` plus `ajv-draft-04` and `ajv-formats` are dev-only, used to validate emitted SARIF against the vendored official 2.1.0 schema (draft-04) offline in tests. They never load in the scan path.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
