@@ -11,7 +11,7 @@ Agent artifacts are natural-language instructions that execute. A `SKILL.md` fil
 
 Reading the file yourself doesn't close the gap either. The text doesn't have to be visible. Instructions can sit in Unicode ranges that render as nothing at all, or behind a bidi override that reorders what your editor shows you while leaving the underlying bytes intact. The reviewer sees a changelog helper. The model sees the changelog helper plus a line about `~/.ssh/id_ed25519`.
 
-And these files arrive the way dependencies arrive. Public registries index skills for install, and none of them run an automated check before publishing one. The file lands in `.claude/`, where it inherits whatever tools and credentials the agent already has. No `npm audit` covers that directory, and no secret scanner reads it. The surface isn't in anybody's pipeline.
+And these files arrive the way dependencies arrive. Community registries index them by the tens of thousands: ClawHub alone lists around 70,000. They go up the way community packages go up, and a security review before a skill is published is the exception. The file lands in `.claude/`, where it inherits whatever tools and credentials the agent already has. No `npm audit` covers that directory, and no secret scanner reads it. The surface isn't in anybody's pipeline.
 
 That's the layer this covers. The research it's built on is public and worth reading before you decide how much it matters to you: Snyk's *ToxicSkills* review found security flaws in 36% of the agent skills it examined and catalogued 1,467 malicious payloads, and *Seeing Is Not Screening* (arXiv 2606.18198) documents hidden-instruction attacks that get past existing skill scanners.
 
