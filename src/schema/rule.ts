@@ -63,6 +63,11 @@ export const mcpSecretMatcherSchema = z.strictObject({
   type: z.literal("mcp-secret"),
 });
 
+export const mcpServerSourceMatcherSchema = z.strictObject({
+  type: z.literal("mcp-server-source"),
+  detect: z.enum(["insecure-transport", "git-source"]),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -73,6 +78,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   homoglyphMatcherSchema,
   encodedBlobMatcherSchema,
   mcpSecretMatcherSchema,
+  mcpServerSourceMatcherSchema,
 ]);
 
 const prose = z

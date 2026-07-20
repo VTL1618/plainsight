@@ -5,6 +5,7 @@ import { matchFrontmatterField } from "./frontmatter-field.js";
 import { matchHomoglyph } from "./homoglyph.js";
 import { matchHtmlComment } from "./html-comment.js";
 import { matchMcpSecret } from "./mcp-secret.js";
+import { matchMcpServerSource } from "./mcp-server-source.js";
 import type { ParsedMcp } from "../parse/mcp.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
@@ -52,5 +53,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return matchEncodedBlob(context.source, config);
     case "mcp-secret":
       return context.mcp === null ? [] : matchMcpSecret(context.mcp);
+    case "mcp-server-source":
+      return context.mcp === null ? [] : matchMcpServerSource(context.mcp, config);
   }
 }

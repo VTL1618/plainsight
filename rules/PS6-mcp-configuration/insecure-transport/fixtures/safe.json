@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "analytics": {
+      "type": "sse",
+      "url": "https://mcp.internal.example.com/sse"
+    },
+    "local-dev": {
+      "type": "http",
+      "url": "http://localhost:8787/mcp"
+    }
+  }
+}
