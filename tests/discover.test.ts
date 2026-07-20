@@ -48,6 +48,18 @@ describe("discoverArtifacts", () => {
     expect(refs.some((r) => r.type === "skill" && r.relPath === "nested/SKILL.md")).toBe(true);
   });
 
+  it("finds .claude-plugin/marketplace.json but not a stray marketplace.json", async () => {
+    const root = tempTree();
+    mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+    mkdirSync(path.join(root, "vendor"), { recursive: true });
+    writeFileSync(path.join(root, ".claude-plugin/marketplace.json"), "{}\n");
+    writeFileSync(path.join(root, "vendor/marketplace.json"), "{}\n");
+
+    const refs = await discoverArtifacts(root);
+    const manifests = refs.filter((r) => r.type === "marketplace-manifest");
+    expect(manifests.map((r) => r.relPath)).toEqual([".claude-plugin/marketplace.json"]);
+  });
+
   it("requires the exact name SKILL.md", async () => {
     const root = tempTree();
     mkdirSync(path.join(root, "s"));

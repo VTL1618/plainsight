@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverArtifacts } from "./discover.js";
 import { runMatcher, type MatcherContext } from "./matchers/index.js";
+import { parseManifest } from "./parse/manifest.js";
 import { parseMcp } from "./parse/mcp.js";
 import { parseSkill } from "./parse/skill.js";
 import { loadRules, type Rule } from "./rules.js";
@@ -81,6 +82,9 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
     const parsed = parseMcp(ref, source);
     if (parsed.ok) context.mcp = parsed.mcp;
     else failure = parsed.failure;
+  } else if (ref.type === "marketplace-manifest") {
+    const parsed = parseManifest(ref, source);
+    if (!parsed.ok) failure = parsed.failure;
   }
 
   const lineIndex = buildLineIndex(source);

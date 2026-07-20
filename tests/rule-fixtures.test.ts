@@ -16,7 +16,11 @@ import type { ArtifactRef, ArtifactType } from "../src/core/types.js";
 const rulesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../rules");
 const rules = await loadRules(rulesDir);
 
-const FIXTURE_EXT: Record<ArtifactType, string> = { skill: "md", "mcp-config": "json" };
+const FIXTURE_EXT: Record<ArtifactType, string> = {
+  skill: "md",
+  "mcp-config": "json",
+  "marketplace-manifest": "json",
+};
 
 function fixtureType(rule: Rule): ArtifactType {
   return rule.targets[0] ?? "skill";

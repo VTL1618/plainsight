@@ -22,6 +22,8 @@ references:
   - https://cwe.mitre.org/data/definitions/506.html
 targets:
   - skill
+  - mcp-config
+  - marketplace-manifest
 matcher:
   type: encoded-blob
   decodeWords:

@@ -21,6 +21,8 @@ references:
   - https://arxiv.org/abs/2603.22489
 targets:
   - skill
+  - mcp-config
+  - marketplace-manifest
 matcher:
   type: substring
   phrases:
