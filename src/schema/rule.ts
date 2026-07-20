@@ -59,6 +59,10 @@ export const encodedBlobMatcherSchema = z.strictObject({
   executeWords: z.array(z.string().min(1)).min(1, "list at least one execute word"),
 });
 
+export const mcpSecretMatcherSchema = z.strictObject({
+  type: z.literal("mcp-secret"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -68,6 +72,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   htmlCommentMatcherSchema,
   homoglyphMatcherSchema,
   encodedBlobMatcherSchema,
+  mcpSecretMatcherSchema,
 ]);
 
 const prose = z

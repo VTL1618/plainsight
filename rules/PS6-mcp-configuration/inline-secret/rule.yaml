@@ -1,0 +1,25 @@
+id: PS6-inline-secret
+category: PS6-mcp-configuration
+severity: high
+title: A credential is written directly into an MCP server config
+description: >-
+  A server entry in this .mcp.json puts an API key or token straight into an
+  env or header value instead of referencing it from the environment. Anyone
+  who can read the repository, its history, or a build log now holds that
+  credential.
+rationale: >-
+  Config files get committed, shared, and cached in ways secrets never should.
+  A value like ${API_KEY} pulls the credential from the environment at launch
+  and leaves nothing in the file. A literal sk-... or xoxb-... token is the
+  credential itself, sitting in version control for anyone with read access.
+remediation: >-
+  Replace the literal value with an environment reference such as ${API_KEY},
+  and set the real value in your shell or secret manager. If the token was ever
+  committed, rotate it and treat it as already exposed.
+references:
+  - https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password
+  - https://modelcontextprotocol.io/docs/concepts/architecture
+targets:
+  - mcp-config
+matcher:
+  type: mcp-secret
