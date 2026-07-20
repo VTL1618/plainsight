@@ -98,6 +98,10 @@ The registry is not the argument. `npm ci` on the runner pulls the same dependen
 
 Implementation requirements: strict lockfile install with `--ignore-scripts`, every action referenced by the wrapper pinned to a commit SHA, action inputs passed to the shell through env rather than template interpolation. The cost is roughly half a minute of install-and-build per run; the fast path is `npx plainsight@<version>`, documented in the README.
 
+## 2026-07-20: Release automation is changesets plus npm trusted publishing
+
+`@changesets/cli` (dev-only, specified in §4) manages versions and changelogs: a PR carries a changeset, a bot PR accumulates them, merging that publishes. Publishing goes through npm trusted publishing over OIDC with provenance, so no npm token exists in the repository or its secrets, and every published version is attestable back to a commit and workflow run. Two steps stay manual by nature: the very first publish (npm cannot configure a trusted publisher for a package that does not exist yet) and the one-time trusted-publisher configuration on npmjs.com. Both are written out step by step in docs/RELEASING.md.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
