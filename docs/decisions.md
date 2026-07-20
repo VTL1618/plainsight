@@ -102,6 +102,14 @@ Implementation requirements: strict lockfile install with `--ignore-scripts`, ev
 
 `@changesets/cli` (dev-only, specified in §4) manages versions and changelogs: a PR carries a changeset, a bot PR accumulates them, merging that publishes. Publishing goes through npm trusted publishing over OIDC with provenance, so no npm token exists in the repository or its secrets, and every published version is attestable back to a commit and workflow run. Two steps stay manual by nature: the very first publish (npm cannot configure a trusted publisher for a package that does not exist yet) and the one-time trusted-publisher configuration on npmjs.com. Both are written out step by step in docs/RELEASING.md.
 
+## 2026-07-20: README badges
+
+The README carries two: CI status (GitHub's own workflow badge) and npm version (shields.io). The npm badge renders as "not found" until the first publish and fixes itself after; that is honest, so it ships now.
+
+## Backlog: a "scanned with plainsight" badge (Phase 6)
+
+A badge for other repositories: a registry or skill author whose tree scans clean puts it in their README. This is a distribution mechanism, not decoration. Registries like adding badges, and every repository that displays one advertises the tool to exactly the audience that should adopt it. The claim has to stay honest to work: tied to a scanner version and a scan date, something like "scanned with plainsight vX, 0 findings at high or above", never an open-ended "safe". Implementation lands with the Phase 6 registry-facing work.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.

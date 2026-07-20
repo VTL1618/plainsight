@@ -24,8 +24,8 @@ You need: an npm account with two-factor authentication enabled, and this reposi
 4. Run `npm login`. A browser window opens; sign in to npm there, then return to the terminal.
 5. Run `npm whoami`. It must print your npm username. If it errors, repeat step 4.
 6. Run `npm publish --dry-run`. This builds the package and prints every file that would be uploaded, without uploading anything. Read the list. It must contain only: `LICENSE`, `README.md`, `package.json`, files under `dist/`, and `rule.yaml` files under `rules/`. No fixtures, no tests, no dotfiles. If anything unexpected shows up, stop and investigate.
-7. Run `npm publish`. It runs the full check suite first, then asks for your two-factor code. When it finishes, https://www.npmjs.com/package/plainsight is live.
-8. Push the version commit: `git push`.
+7. Run `npx changeset publish`. It runs the full check suite, asks for your two-factor code, publishes, and creates the git tag `v0.1.0`. The tag matters: the README tells users to pin the GitHub Action to it. When it finishes, https://www.npmjs.com/package/plainsight is live.
+8. Push the version commit and the tag: `git push --follow-tags`.
 
 ### Step 2: let CI publish future releases
 
