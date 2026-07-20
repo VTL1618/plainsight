@@ -1,0 +1,38 @@
+name: Report a bug
+description: The scanner crashed, missed something it claims to catch, or flagged something it should not.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        A security vulnerability in plainsight itself does not belong here.
+        Follow SECURITY.md for coordinated disclosure instead.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `npx plainsight --version`.
+      placeholder: plainsight 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran.
+      placeholder: npx plainsight scan . --format sarif
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Paste output where you can. For a false positive, include the flagged text; for a miss, include the artifact that should have been flagged.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true

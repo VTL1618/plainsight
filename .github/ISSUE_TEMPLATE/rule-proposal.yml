@@ -1,0 +1,95 @@
+name: Propose a detection rule
+description: Suggest a pattern plainsight should catch. The fields map one to one onto rule.yaml, so anyone can build the rule from a complete proposal.
+title: "[rule] "
+labels: ["rule-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        A complete proposal is buildable by a stranger in 15 minutes.
+        The two snippet fields at the bottom matter most: the safe look-alike
+        is what keeps the rule from crying wolf.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which threat category does this belong to?
+      options:
+        - PS1 instruction injection
+        - PS2 hidden content
+        - PS3 exfiltration primitives
+        - PS4 permission escalation
+        - PS5 supply chain
+        - PS6 MCP configuration
+    validations:
+      required: true
+  - type: input
+    id: slug
+    attributes:
+      label: Suggested slug
+      description: Lowercase words joined by hyphens. Becomes the rule ID, e.g. `PS2-unicode-tag-block`.
+      placeholder: browser-cookie-stores
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: "critical: working exfiltration or RCE primitive. high: escalation or hidden instruction. medium: risky pattern with plausible legitimate use. low: hygiene."
+      options:
+        - critical
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: One line naming what the rule finds.
+      placeholder: Instruction to read a browser cookie store
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What does the attacker achieve?
+      description: One or two plain sentences, written for a reader who is not a security engineer. This becomes the finding text.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why does this matter, and where is the line?
+      description: What separates the malicious pattern from legitimate use of the same words or tools?
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: What should the author of a flagged file do?
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to research, advisories, or real incidents. One per line.
+      placeholder: https://owasp.org/...
+  - type: textarea
+    id: vulnerable
+    attributes:
+      label: Vulnerable example
+      description: A minimal artifact that MUST produce a finding. This becomes fixtures/vulnerable.md.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: safe
+    attributes:
+      label: Safe look-alike
+      description: A benign artifact that superficially resembles the attack and MUST NOT produce a finding. This becomes fixtures/safe.md. If you cannot write one, the rule is too broad; say so and describe the problem.
+      render: markdown
+    validations:
+      required: true
