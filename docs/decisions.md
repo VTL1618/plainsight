@@ -86,6 +86,10 @@ The baseline is a versioned JSON file, `{ "version": 1, "fingerprints": [...] }`
 
 The zero-config default is human-readable terminal output (CLAUDE.md §2); SARIF and JSON are opt-in via `--format`. Color is decided from `--color`/`--no-color`, then `NO_COLOR`/`FORCE_COLOR`, then whether stdout is a TTY, so piped output is clean. `ajv` plus `ajv-draft-04` and `ajv-formats` are dev-only, used to validate emitted SARIF against the vendored official 2.1.0 schema (draft-04) offline in tests. They never load in the scan path.
 
+## 2026-07-20: Packaging is plain tsc, fixtures stay out of the tarball
+
+The build is `tsc` into `dist/`, no bundler. Path resolution already treats the package root as two directories up from the running module, so compiled output finds `rules/` and `package.json` without changes; a bundler would break that for zero benefit. Rule fixtures are excluded from the npm tarball: the engine reads only `rule.yaml`, and shipping files full of deliberate attack strings into every user's `node_modules` invites noise from other scanners. A pack smoke script (`scripts/pack-smoke.sh`, run in CI) installs the real tarball into a clean directory and exercises the CLI, because the tree working under tsx proves nothing about the published package.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
