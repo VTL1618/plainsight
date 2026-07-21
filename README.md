@@ -3,7 +3,7 @@
 [![CI](https://github.com/VTL1618/plainsight/actions/workflows/ci.yml/badge.svg)](https://github.com/VTL1618/plainsight/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/plainsight)](https://www.npmjs.com/package/plainsight)
 
-A static security scanner for `SKILL.md` skills and the MCP server configs (`.mcp.json`) and plugin marketplace manifests that sit alongside them. It reads them the way the model does, not the way your editor renders them.
+A static security scanner for the files that steer an AI agent: `SKILL.md` skills, slash commands, `.mcp.json` MCP configs, plugin marketplace manifests, and hooks. It reads them the way the model does, not the way your editor renders them.
 
 ## The problem
 
@@ -47,7 +47,7 @@ The hidden run is decoded right in the finding, so a reviewer sees exactly what 
 
 ## What it detects
 
-16 rules across six categories today. Run `npx plainsight rules` for the list and `npx plainsight explain <ruleId>` for what any rule catches, why it matters, and how to fix a hit.
+17 rules across six categories today. Run `npx plainsight rules` for the list and `npx plainsight explain <ruleId>` for what any rule catches, why it matters, and how to fix a hit.
 
 | Category | Focus | Rules today |
 |---|---|---|
@@ -55,12 +55,14 @@ The hidden run is decoded right in the finding, so a reviewer sees exactly what 
 | PS2 | Hidden content | tag-block, zero-width, and bidi characters; comment-hidden instructions; look-alike names; decode-and-run blobs |
 | PS3 | Exfiltration primitives | reading a credential store, a secret interpolated into an outbound URL |
 | PS4 | Permission escalation | a skill requesting unrestricted tools |
-| PS5 | Supply chain | a download piped straight into a shell |
+| PS5 | Supply chain | a download piped into a shell, in a skill or in a hook that runs on its own |
 | PS6 | MCP configuration | inline secrets, plaintext transport, git launch sources, and the injection and hidden-content rules on the MCP surface |
+
+A rule applies wherever its attack can land. The injection, hidden-content, and exfiltration rules run on skills, slash commands, MCP configs, manifests, and hook commands alike, not just the surface they were first written for.
 
 ## What this does not catch
 
-A static analyzer matches patterns and can't judge intent. A paraphrased injection with no structural tell will get past it. So will anything that only turns dangerous at runtime: an MCP server's tool descriptions arrive when the server starts, so the static configs and manifests are scanned, not what a live server hands back. Hooks and slash commands aren't parsed yet.
+A static analyzer matches patterns and can't judge intent. A paraphrased injection with no structural tell will get past it. So will anything that only becomes dangerous at runtime: an MCP server's tool descriptions arrive when the server starts, not in the config that launches it. A hook that runs a local script is only as safe as that script, and plainsight reads the command, not the file it points to.
 
 Rules that couldn't earn an honest safe fixture didn't ship. Several detection ideas sit in the backlog for exactly that reason: a flat version fires on ordinary files, and a scanner that cries wolf gets uninstalled in a week. One candidate, a rule for unpinned installs, was falsified against this project's own corpus, which carries two legitimate unpinned installs. Sixteen rules shipped. The rest wait for a sharper signal.
 
