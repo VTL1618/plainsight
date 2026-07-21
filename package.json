@@ -27,6 +27,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "cli": "tsx src/cli/bin.ts",
+    "version:ci": "changeset version && tsx scripts/sync-readme-version.ts",
     "new-rule": "tsx scripts/new-rule.ts",
     "sweep": "tsx scripts/sweep.ts"
   },

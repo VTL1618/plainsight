@@ -25,6 +25,9 @@ jobs:
       - run: npm ci --ignore-scripts
       - uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
+          # Bump the version, then repin the README examples to it in the same
+          # commit, so a release never ships docs pointing at an older version.
+          version: npm run version:ci
           publish: npx changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

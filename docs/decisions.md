@@ -158,6 +158,12 @@ Most hook value comes from extending the raw injection, hidden-content, and exfi
 
 `permissions.allow` in settings.json (for example a broad `Bash(*)`) was considered for PS4 and held back. Unlike a skill's `allowed-tools`, which is an untrusted artifact requesting escalation, settings permissions are the user's own configuration of their own machine. Flagging a user's deliberate grant is noise, a different semantic from a third-party artifact asking for more than its purpose needs. Revisit only if a committed, shared settings.json becomes a common attack vector.
 
+## 2026-07-21: README version pins are synced by the release, and guarded by a test
+
+The 0.3.0 README still pinned its Action and npx examples to 0.2.0, a version that cannot scan the hooks and slash commands the same page advertises. The earlier reasoning ("examples pin to a real version; a patch does not need an example bump") held for 0.2.1 but was never revisited for a minor release that adds the very capability the prose describes, so the docs told readers to install a version that could not do it.
+
+Two changes, because the instance and the class both needed fixing. `scripts/sync-readme-version.ts` repins the examples from package.json and runs as part of `changeset version` (wired through the `version:ci` script in release.yml), so a release cannot ship docs pointing at an older version. `tests/readme-version.test.ts` fails if a pin ever drifts from package.json, which is the guard for anything the script does not cover. Pinning stays: unpinned examples would contradict the supply-chain advice this tool gives.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.

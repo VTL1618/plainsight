@@ -64,7 +64,7 @@ A rule applies wherever its attack can land. The injection, hidden-content, and 
 
 A static analyzer matches patterns and can't judge intent. A paraphrased injection with no structural tell will get past it. So will anything that only becomes dangerous at runtime: an MCP server's tool descriptions arrive when the server starts, not in the config that launches it. A hook that runs a local script is only as safe as that script, and plainsight reads the command, not the file it points to.
 
-Rules that couldn't earn an honest safe fixture didn't ship. Several detection ideas sit in the backlog for exactly that reason: a flat version fires on ordinary files, and a scanner that cries wolf gets uninstalled in a week. One candidate, a rule for unpinned installs, was falsified against this project's own corpus, which carries two legitimate unpinned installs. Sixteen rules shipped. The rest wait for a sharper signal.
+Rules that couldn't earn an honest safe fixture didn't ship. Several detection ideas sit in the backlog for exactly that reason: a flat version fires on ordinary files, and a scanner that cries wolf gets uninstalled in a week. One candidate, a rule for unpinned installs, was falsified against this project's own corpus, which carries two legitimate unpinned installs. Seventeen rules shipped. The rest wait for a sharper signal.
 
 The false-positive budget gets the same attention as detection. Every rule ships with its benign look-alike, and CI runs 12 of Anthropic's own published skills through the scanner on every pull request, failing the build if any of them produces a critical or high finding.
 
@@ -90,7 +90,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: VTL1618/plainsight/action@v0.2.0 # or pin a commit SHA
+      - uses: VTL1618/plainsight/action@v0.3.0 # or pin a commit SHA
       - uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a # v4
         if: always()
         with:
@@ -100,7 +100,7 @@ jobs:
 The action has no prebuilt bundle. It compiles the scanner from source at the ref you pinned, from the committed lockfile, with install scripts disabled. That costs about half a minute per run and buys something a security tool should offer: every line that executes in your CI is readable TypeScript in this repository, not a minified blob you're asked to trust. If you'd rather have the fast path, run the published package directly:
 
 ```yaml
-- run: npx plainsight@0.2.0 scan . --format sarif > plainsight.sarif
+- run: npx plainsight@0.3.0 scan . --format sarif > plainsight.sarif
 ```
 
 Action inputs, all optional: `path` (default `.`), `sarif-file` (default `plainsight.sarif`), `fail-on` (default `high`), `baseline`.
