@@ -26,6 +26,7 @@ targets:
   - skill
   - mcp-config
   - marketplace-manifest
+  - slash-command
 matcher:
   type: unicode-range
   ranges:

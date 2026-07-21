@@ -74,7 +74,9 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
   const context: MatcherContext = { source, skill: null, mcp: null };
   let failure: ParseFailure | undefined;
 
-  if (ref.type === "skill") {
+  if (ref.type === "skill" || ref.type === "slash-command") {
+    // A slash command is a Markdown prompt template with frontmatter, structurally
+    // a skill, so it reuses the skill parser and every skill rule applies to it.
     const parsed = parseSkill(ref, source);
     if (parsed.ok) context.skill = parsed.skill;
     else failure = parsed.failure;

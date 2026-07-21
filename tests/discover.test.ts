@@ -60,6 +60,22 @@ describe("discoverArtifacts", () => {
     expect(manifests.map((r) => r.relPath)).toEqual([".claude-plugin/marketplace.json"]);
   });
 
+  it("finds Markdown slash commands under .claude/commands, nesting allowed", async () => {
+    const root = tempTree();
+    mkdirSync(path.join(root, ".claude/commands/git"), { recursive: true });
+    mkdirSync(path.join(root, "docs"), { recursive: true });
+    writeFileSync(path.join(root, ".claude/commands/deploy.md"), "# deploy\n");
+    writeFileSync(path.join(root, ".claude/commands/git/commit.md"), "# commit\n");
+    writeFileSync(path.join(root, "docs/readme.md"), "# not a command\n");
+
+    const refs = await discoverArtifacts(root);
+    const commands = refs.filter((r) => r.type === "slash-command");
+    expect(commands.map((r) => r.relPath)).toEqual([
+      ".claude/commands/deploy.md",
+      ".claude/commands/git/commit.md",
+    ]);
+  });
+
   it("requires the exact name SKILL.md", async () => {
     const root = tempTree();
     mkdirSync(path.join(root, "s"));

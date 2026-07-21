@@ -20,6 +20,7 @@ const FIXTURE_EXT: Record<ArtifactType, string> = {
   skill: "md",
   "mcp-config": "json",
   "marketplace-manifest": "json",
+  "slash-command": "md",
 };
 
 function fixtureType(rule: Rule): ArtifactType {

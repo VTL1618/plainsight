@@ -52,24 +52,32 @@ async function walk(
       if (excludeDirs.has(entry.name)) continue;
       await walk(abs, root, depth + 1, excludeDirs, maxDepth, out);
     } else if (entry.isFile()) {
-      const type = classify(entry.name, path.basename(dir));
-      if (type !== null) {
-        out.push({
-          type,
-          path: abs,
-          relPath: path.relative(root, abs).split(path.sep).join("/"),
-        });
-      }
+      const relPath = path.relative(root, abs).split(path.sep).join("/");
+      const type = classify(entry.name, relPath);
+      if (type !== null) out.push({ type, path: abs, relPath });
     }
   }
 }
 
-/** Maps a filename (and its parent directory) to the artifact kind, or null when not scannable. */
-function classify(name: string, parentDir: string): ArtifactType | null {
+/** Maps a filename and its repo-relative path to the artifact kind, or null when not scannable. */
+function classify(name: string, relPath: string): ArtifactType | null {
   if (name === "SKILL.md") return "skill";
   if (name === ".mcp.json") return "mcp-config";
   // The plugin marketplace manifest lives at the known path .claude-plugin/marketplace.json,
   // so scope to that parent to avoid claiming unrelated files named marketplace.json.
-  if (name === "marketplace.json" && parentDir === ".claude-plugin") return "marketplace-manifest";
+  if (name === "marketplace.json" && parentDir(relPath) === ".claude-plugin") return "marketplace-manifest";
+  // Slash commands are any Markdown file under a .claude/commands/ tree, nesting allowed.
+  if (name.endsWith(".md") && underDir(relPath, ".claude/commands")) return "slash-command";
   return null;
+}
+
+/** The immediate parent directory name of a forward-slashed relative path. */
+function parentDir(relPath: string): string {
+  const parts = relPath.split("/");
+  return parts.length >= 2 ? (parts[parts.length - 2] ?? "") : "";
+}
+
+/** Whether the path lies under the given directory segment sequence, at any depth. */
+function underDir(relPath: string, segment: string): boolean {
+  return relPath.startsWith(`${segment}/`) || relPath.includes(`/${segment}/`);
 }

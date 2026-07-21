@@ -20,6 +20,7 @@ references:
   - https://cwe.mitre.org/data/definitions/494.html
 targets:
   - skill
+  - slash-command
 matcher:
   type: command-token
   detect: pipe-to-shell

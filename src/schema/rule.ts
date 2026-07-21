@@ -100,7 +100,7 @@ export const ruleSchema = z.strictObject({
   remediation: prose,
   references: z.array(z.url()).min(1, "cite at least one reference"),
   targets: z
-    .array(z.enum(["skill", "mcp-config", "marketplace-manifest"]))
+    .array(z.enum(["skill", "mcp-config", "marketplace-manifest", "slash-command"]))
     .min(1, "name at least one artifact type"),
   matcher: matcherSchema,
 });
