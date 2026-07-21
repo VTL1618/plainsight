@@ -90,7 +90,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: VTL1618/plainsight/action@v0.3.0 # or pin a commit SHA
+      - uses: VTL1618/plainsight/action@v0.3.1 # or pin a commit SHA
       - uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a # v4
         if: always()
         with:
@@ -100,7 +100,7 @@ jobs:
 The action has no prebuilt bundle. It compiles the scanner from source at the ref you pinned, from the committed lockfile, with install scripts disabled. That costs about half a minute per run and buys something a security tool should offer: every line that executes in your CI is readable TypeScript in this repository, not a minified blob you're asked to trust. If you'd rather have the fast path, run the published package directly:
 
 ```yaml
-- run: npx plainsight@0.3.0 scan . --format sarif > plainsight.sarif
+- run: npx plainsight@0.3.1 scan . --format sarif > plainsight.sarif
 ```
 
 Action inputs, all optional: `path` (default `.`), `sarif-file` (default `plainsight.sarif`), `fail-on` (default `high`), `baseline`.
