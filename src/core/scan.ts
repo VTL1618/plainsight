@@ -3,6 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverArtifacts } from "./discover.js";
 import { runMatcher, type MatcherContext } from "./matchers/index.js";
+import { parseManifest } from "./parse/manifest.js";
+import { parseMcp } from "./parse/mcp.js";
 import { parseSkill } from "./parse/skill.js";
 import { loadRules, type Rule } from "./rules.js";
 import { buildLineIndex, positionAt } from "./text.js";
@@ -60,17 +62,31 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
 }
 
 /**
- * Scan one artifact. Parsing always runs and its outcome always travels back
- * in the result, but matchers do not wait on it: raw matchers read the file
- * source directly, so a file whose frontmatter refuses to parse still has
- * every byte searched for hidden content. A deliberately broken frontmatter
- * block must never exempt the rest of the file from scanning, which is the
- * parser-differential bypass this tool exists to catch. Structured matchers
- * read the parsed skill and produce nothing when parsing failed.
+ * Scan one artifact. Parsing is chosen by artifact kind and its outcome always
+ * travels back in the result, but matchers do not wait on it: raw matchers read
+ * the file source directly, so a file whose structure refuses to parse still
+ * has every byte searched for hidden content. A deliberately broken block must
+ * never exempt the rest of the file from scanning, which is the parser-
+ * differential bypass this tool exists to catch. Structured matchers read the
+ * parsed artifact and produce nothing when parsing failed.
  */
 export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): ArtifactScanResult {
-  const parsed = parseSkill(ref, source);
-  const context: MatcherContext = { source, skill: parsed.ok ? parsed.skill : null };
+  const context: MatcherContext = { source, skill: null, mcp: null };
+  let failure: ParseFailure | undefined;
+
+  if (ref.type === "skill") {
+    const parsed = parseSkill(ref, source);
+    if (parsed.ok) context.skill = parsed.skill;
+    else failure = parsed.failure;
+  } else if (ref.type === "mcp-config") {
+    const parsed = parseMcp(ref, source);
+    if (parsed.ok) context.mcp = parsed.mcp;
+    else failure = parsed.failure;
+  } else if (ref.type === "marketplace-manifest") {
+    const parsed = parseManifest(ref, source);
+    if (!parsed.ok) failure = parsed.failure;
+  }
+
   const lineIndex = buildLineIndex(source);
 
   const findings: Finding[] = [];
@@ -90,8 +106,7 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
     }
   }
 
-  if (!parsed.ok) return { findings, failure: parsed.failure };
-  return { findings };
+  return failure ? { findings, failure } : { findings };
 }
 
 export function defaultRulesDir(): string {

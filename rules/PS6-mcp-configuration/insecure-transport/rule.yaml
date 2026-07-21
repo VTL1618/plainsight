@@ -1,0 +1,25 @@
+id: PS6-insecure-transport
+category: PS6-mcp-configuration
+severity: medium
+title: An MCP server is reached over an unencrypted http connection
+description: >-
+  A remote server in this .mcp.json is addressed with an http:// URL. Every
+  tool call, its arguments, and its results travel in the clear, so anyone on
+  the network path can read them or change what the server sends back to the
+  agent.
+rationale: >-
+  MCP tool traffic carries whatever the agent passes to a tool and whatever it
+  gets back, which the agent then acts on. Over http that channel is open to
+  interception and tampering; https closes it. Local loopback addresses stay
+  quiet, because there is no network in between to intercept.
+remediation: >-
+  Use an https:// URL for the server, or run it locally. If the endpoint only
+  offers http, treat it as untrusted and do not connect an agent to it.
+references:
+  - https://modelcontextprotocol.io/docs/concepts/transports
+  - https://owasp.org/www-community/vulnerabilities/Insufficient_Transport_Layer_Protection
+targets:
+  - mcp-config
+matcher:
+  type: mcp-server-source
+  detect: insecure-transport

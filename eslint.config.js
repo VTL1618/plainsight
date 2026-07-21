@@ -2,7 +2,10 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist/", "node_modules/", "rules/**/fixtures/"] },
+  // .claude/ holds git worktrees; linting a parent repo must not descend into a
+  // nested checkout's build output. dist/ and node_modules are only anchored at
+  // the root, so name the worktree home explicitly.
+  { ignores: ["dist/", "node_modules/", "rules/**/fixtures/", ".claude/"] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,

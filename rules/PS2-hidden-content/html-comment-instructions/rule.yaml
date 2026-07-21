@@ -21,6 +21,8 @@ references:
   - https://arxiv.org/abs/2606.18198
 targets:
   - skill
+  - mcp-config
+  - marketplace-manifest
 matcher:
   type: html-comment
   phrases:

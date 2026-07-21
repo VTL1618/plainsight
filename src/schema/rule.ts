@@ -59,6 +59,15 @@ export const encodedBlobMatcherSchema = z.strictObject({
   executeWords: z.array(z.string().min(1)).min(1, "list at least one execute word"),
 });
 
+export const mcpSecretMatcherSchema = z.strictObject({
+  type: z.literal("mcp-secret"),
+});
+
+export const mcpServerSourceMatcherSchema = z.strictObject({
+  type: z.literal("mcp-server-source"),
+  detect: z.enum(["insecure-transport", "git-source"]),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -68,6 +77,8 @@ export const matcherSchema = z.discriminatedUnion("type", [
   htmlCommentMatcherSchema,
   homoglyphMatcherSchema,
   encodedBlobMatcherSchema,
+  mcpSecretMatcherSchema,
+  mcpServerSourceMatcherSchema,
 ]);
 
 const prose = z
@@ -88,7 +99,9 @@ export const ruleSchema = z.strictObject({
   rationale: prose,
   remediation: prose,
   references: z.array(z.url()).min(1, "cite at least one reference"),
-  targets: z.array(z.enum(["skill"])).min(1, "name at least one artifact type"),
+  targets: z
+    .array(z.enum(["skill", "mcp-config", "marketplace-manifest"]))
+    .min(1, "name at least one artifact type"),
   matcher: matcherSchema,
 });
 

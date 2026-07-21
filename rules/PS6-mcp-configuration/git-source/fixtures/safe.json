@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "official": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/data"]
+    },
+    "pinned": {
+      "command": "npx",
+      "args": ["-y", "@scope/mcp-server@1.4.2"]
+    }
+  }
+}

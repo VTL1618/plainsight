@@ -1,6 +1,6 @@
 import { opendir } from "node:fs/promises";
 import path from "node:path";
-import type { ArtifactRef } from "./types.js";
+import type { ArtifactRef, ArtifactType } from "./types.js";
 
 export interface DiscoverOptions {
   /** Directory names never descended into. */
@@ -51,12 +51,25 @@ async function walk(
     if (entry.isDirectory()) {
       if (excludeDirs.has(entry.name)) continue;
       await walk(abs, root, depth + 1, excludeDirs, maxDepth, out);
-    } else if (entry.isFile() && entry.name === "SKILL.md") {
-      out.push({
-        type: "skill",
-        path: abs,
-        relPath: path.relative(root, abs).split(path.sep).join("/"),
-      });
+    } else if (entry.isFile()) {
+      const type = classify(entry.name, path.basename(dir));
+      if (type !== null) {
+        out.push({
+          type,
+          path: abs,
+          relPath: path.relative(root, abs).split(path.sep).join("/"),
+        });
+      }
     }
   }
+}
+
+/** Maps a filename (and its parent directory) to the artifact kind, or null when not scannable. */
+function classify(name: string, parentDir: string): ArtifactType | null {
+  if (name === "SKILL.md") return "skill";
+  if (name === ".mcp.json") return "mcp-config";
+  // The plugin marketplace manifest lives at the known path .claude-plugin/marketplace.json,
+  // so scope to that parent to avoid claiming unrelated files named marketplace.json.
+  if (name === "marketplace.json" && parentDir === ".claude-plugin") return "marketplace-manifest";
+  return null;
 }

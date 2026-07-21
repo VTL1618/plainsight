@@ -1,0 +1,27 @@
+id: PS6-git-source
+category: PS6-mcp-configuration
+severity: medium
+title: An MCP server is launched from a mutable git source
+description: >-
+  A server in this .mcp.json is started from a git reference (github:, git+, or
+  a .git URL) rather than a published package. The code that runs is whatever
+  sits at that reference right now, and it can change after you review it while
+  the config stays the same.
+rationale: >-
+  A published package version is immutable: pin it and you get the same code
+  every time. A git reference is a moving target. Whoever controls the
+  repository can replace the server's code between your review and your next
+  launch, and the agent runs it with your tools and credentials. A bare npm
+  package name is not flagged; the concern is code pulled straight from a repo.
+remediation: >-
+  Install the server from a published, versioned package, or vendor the code
+  and run it from a local path you control. If a git source is unavoidable, pin
+  it to a full commit SHA, never a branch or tag.
+references:
+  - https://modelcontextprotocol.io/docs/concepts/architecture
+  - https://owasp.org/www-project-top-10-ci-cd-security-risks/
+targets:
+  - mcp-config
+matcher:
+  type: mcp-server-source
+  detect: git-source

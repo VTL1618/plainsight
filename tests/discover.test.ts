@@ -35,6 +35,31 @@ describe("discoverArtifacts", () => {
     expect(refs.every((r) => path.isAbsolute(r.path))).toBe(true);
   });
 
+  it("finds .mcp.json files as mcp-config artifacts", async () => {
+    const root = tempTree();
+    mkdirSync(path.join(root, "nested"), { recursive: true });
+    writeFileSync(path.join(root, ".mcp.json"), "{}\n");
+    writeFileSync(path.join(root, "nested/.mcp.json"), "{}\n");
+    writeFileSync(path.join(root, "nested/SKILL.md"), "# skill\n");
+
+    const refs = await discoverArtifacts(root);
+    const mcp = refs.filter((r) => r.type === "mcp-config");
+    expect(mcp.map((r) => r.relPath)).toEqual([".mcp.json", "nested/.mcp.json"]);
+    expect(refs.some((r) => r.type === "skill" && r.relPath === "nested/SKILL.md")).toBe(true);
+  });
+
+  it("finds .claude-plugin/marketplace.json but not a stray marketplace.json", async () => {
+    const root = tempTree();
+    mkdirSync(path.join(root, ".claude-plugin"), { recursive: true });
+    mkdirSync(path.join(root, "vendor"), { recursive: true });
+    writeFileSync(path.join(root, ".claude-plugin/marketplace.json"), "{}\n");
+    writeFileSync(path.join(root, "vendor/marketplace.json"), "{}\n");
+
+    const refs = await discoverArtifacts(root);
+    const manifests = refs.filter((r) => r.type === "marketplace-manifest");
+    expect(manifests.map((r) => r.relPath)).toEqual([".claude-plugin/marketplace.json"]);
+  });
+
   it("requires the exact name SKILL.md", async () => {
     const root = tempTree();
     mkdirSync(path.join(root, "s"));

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "analytics": {
+      "type": "sse",
+      "url": "http://mcp.internal.example.com/sse"
+    }
+  }
+}

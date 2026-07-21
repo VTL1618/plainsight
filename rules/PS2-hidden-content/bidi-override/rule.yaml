@@ -24,6 +24,8 @@ references:
   - https://nvd.nist.gov/vuln/detail/CVE-2021-42574
 targets:
   - skill
+  - mcp-config
+  - marketplace-manifest
 matcher:
   type: unicode-range
   ranges:
