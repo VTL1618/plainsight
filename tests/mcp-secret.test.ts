@@ -16,7 +16,7 @@ describe("matchMcpSecret", () => {
     const cases = [
       { KEY: "ghp_wJ8kLmN0pQrStUvWxYz1234567890abcdef" },
       { KEY: "sk-ant-api03-abcdefghijklmnopqrstuvwx" },
-      { KEY: "xoxb-1234567890-ABCDEFGHIJKLMNOP" },
+      { KEY: "xoxb-not-a-real-token" },
       { KEY: "AKIAIOSFODNN7EXAMPLE" },
       { KEY: "AIzaSyD-1234567890abcdefghijklmnopqrst" },
     ];
