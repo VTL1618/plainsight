@@ -3,6 +3,7 @@ import { matchCommandToken } from "./command-token.js";
 import { matchEncodedBlob } from "./encoded-blob.js";
 import { matchFrontmatterField } from "./frontmatter-field.js";
 import { matchHomoglyph } from "./homoglyph.js";
+import { matchHooksCommand } from "./hooks-command.js";
 import { matchHtmlComment } from "./html-comment.js";
 import { matchMcpSecret } from "./mcp-secret.js";
 import { matchMcpServerSource } from "./mcp-server-source.js";
@@ -57,5 +58,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return context.mcp === null ? [] : matchMcpSecret(context.mcp);
     case "mcp-server-source":
       return context.mcp === null ? [] : matchMcpServerSource(context.mcp, config);
+    case "hooks-command":
+      return context.settings === null ? [] : matchHooksCommand(context.settings, config);
   }
 }

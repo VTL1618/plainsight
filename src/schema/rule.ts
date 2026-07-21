@@ -68,6 +68,11 @@ export const mcpServerSourceMatcherSchema = z.strictObject({
   detect: z.enum(["insecure-transport", "git-source"]),
 });
 
+export const hooksCommandMatcherSchema = z.strictObject({
+  type: z.literal("hooks-command"),
+  detect: z.literal("pipe-to-shell"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -79,6 +84,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   encodedBlobMatcherSchema,
   mcpSecretMatcherSchema,
   mcpServerSourceMatcherSchema,
+  hooksCommandMatcherSchema,
 ]);
 
 const prose = z
