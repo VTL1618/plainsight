@@ -21,5 +21,7 @@ references:
   - https://arxiv.org/abs/2606.18198
 targets:
   - skill
+  - slash-command
+  - hooks-config
 matcher:
   type: url-token

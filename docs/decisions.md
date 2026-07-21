@@ -142,6 +142,22 @@ A value that demonstrates a secret in a fixture or test must match the detector'
 
 The false-positive corpus is skills only. Adding one or two real, benign `.mcp.json` files (under the same vendoring policy: permissive license, SOURCES.md, SHA) would exercise the PS6 rules against genuine configs, not just safe fixtures. Held back from Phase 6 because a cleanly licensed primary-source config was not sourced in the session; the safe fixtures and the self-scan carry the false-positive guard until then.
 
+## 2026-07-21: Slash commands reuse the skill pipeline
+
+A slash command (`.claude/commands/**/*.md`) is a Markdown prompt template with frontmatter, structurally identical to a skill. It reuses `parseSkill`, and every PS1-PS5 rule extends to the `slash-command` target rather than getting duplicated. Structured rules that read a frontmatter field (wildcard-tools, homoglyph) produce nothing when the field is absent, so extending them is safe. This is the same reuse principle as the MCP surface, applied to a surface that happens to share the skill's shape exactly.
+
+## 2026-07-21: settings.json is strict JSON, confirmed against the runtime
+
+The Claude Code docs state that settings files are read strictly and an invalid one is "rejected as a whole and reported". So the parser-differential is clean: we parse `.claude/settings.json` with strict `JSON.parse`, the same as the runtime, and a parse failure is surfaced rather than swallowed. No JSONC tolerance and no dependency were needed, which the parser-differential principle would otherwise have forced us to weigh. Verified before building, not assumed.
+
+## 2026-07-21: Hooks are raw reuse plus one structured rule
+
+Most hook value comes from extending the raw injection, hidden-content, and exfiltration rules to the `hooks-config` target: a hook command that reads a credential store, exfiltrates an env var to a URL, or carries injection text is caught by matchers that scan bytes, and those fire inside a JSON string fine. The one exception is the pipe-to-shell shape: `command-token` reads the first token of a line, which in JSON is the `"command":` key, not the shell command, so it cannot see a curl-into-bash hook. That earns a structured rule, `PS5-hook-download-to-shell`, which pulls the command string from the parsed settings and runs the shared `shell-shape` test on it. The shape test moved to `shell-shape.ts` so `command-token` and the hooks matcher agree on one definition. A hook fires automatically, so the hook form is critical where the skill form is not.
+
+## 2026-07-21: settings.json permissions are not a PS4 target
+
+`permissions.allow` in settings.json (for example a broad `Bash(*)`) was considered for PS4 and held back. Unlike a skill's `allowed-tools`, which is an untrusted artifact requesting escalation, settings permissions are the user's own configuration of their own machine. Flagging a user's deliberate grant is noise, a different semantic from a third-party artifact asking for more than its purpose needs. Revisit only if a committed, shared settings.json becomes a common attack vector.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.

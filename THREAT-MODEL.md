@@ -31,7 +31,7 @@ Content a human reviewer cannot see, or slides past, while the model reads it pe
 - Instructions hidden inside an HTML comment, where they do not render but still reach the model.
 - An encoded blob sitting next to language that tells the agent to decode and run it.
 
-What plainsight detects: all of the above for skills, and the raw-scanning rules also run on MCP configs and marketplace manifests, since invisible characters and comment-hidden text are just as dangerous in a server name or a plugin description.
+What plainsight detects: all of the above for skills, and the raw-scanning rules also run on MCP configs, marketplace manifests, slash commands, and hook commands, since invisible characters and comment-hidden text are just as dangerous in a server name, a plugin description, or a command that runs automatically.
 
 References: CVE-2021-42574 (Trojan Source, bidirectional override) applies directly here. The arXiv paper *Seeing Is Not Screening* (2606.18198) documents hidden-instruction attacks that get past existing skill scanners.
 
@@ -64,7 +64,7 @@ Code that runs during setup, and where it comes from.
 - A post-install script hook in a bundled `package.json`.
 - A declared homepage or repository URL that does not match the hosting repo.
 
-What plainsight detects: a download piped into a shell, by command shape rather than raw pattern, so `cat file | grep x` shares the pipe but not the shape and stays quiet. Flat unpinned-install detection is held back on corpus evidence: unpinned installs are the documentation norm, so the rule would fire on benign setup instructions.
+What plainsight detects: a download piped into a shell, by command shape rather than raw pattern, so `cat file | grep x` shares the pipe but not the shape and stays quiet. The same shape test runs on hook commands in settings.json, where a curl-into-shell hook fires on its own event with no human in the loop, so it is treated as critical. Flat unpinned-install detection is held back on corpus evidence: unpinned installs are the documentation norm, so the rule would fire on benign setup instructions.
 
 ## PS6: MCP configuration
 
@@ -91,6 +91,6 @@ Reference: MCP threat modeling and tool poisoning are covered in arXiv 2603.2248
 
 - Runtime behavior. plainsight reads files. It does not run a server, so an MCP tool description that only exists once a server is running is outside its reach; only static descriptions in configs and manifests are scanned.
 - Paraphrased injection. An instruction with no structural tell, no override phrasing and no hidden characters, reads as ordinary prose to a pattern matcher.
-- Surfaces not yet parsed. Hooks and slash commands are on the roadmap, not scanned today.
+- Opaque scripts. A hook or command that calls a local script is only as safe as that script. plainsight reads the command, not the file it points to, and cannot judge what an arbitrary shell script does.
 
 Treat plainsight as one more reviewer in the loop, not as proof a file is safe.

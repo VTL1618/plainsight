@@ -21,6 +21,7 @@ references:
   - https://arxiv.org/abs/2603.22489
 targets:
   - skill
+  - slash-command
 matcher:
   type: frontmatter-field
   field: allowed-tools

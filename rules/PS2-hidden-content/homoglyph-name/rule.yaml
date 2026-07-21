@@ -21,6 +21,7 @@ references:
   - https://www.unicode.org/reports/tr39/
 targets:
   - skill
+  - slash-command
 matcher:
   type: homoglyph
   field: name

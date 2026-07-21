@@ -68,6 +68,11 @@ export const mcpServerSourceMatcherSchema = z.strictObject({
   detect: z.enum(["insecure-transport", "git-source"]),
 });
 
+export const hooksCommandMatcherSchema = z.strictObject({
+  type: z.literal("hooks-command"),
+  detect: z.literal("pipe-to-shell"),
+});
+
 export const matcherSchema = z.discriminatedUnion("type", [
   unicodeRangeMatcherSchema,
   substringMatcherSchema,
@@ -79,6 +84,7 @@ export const matcherSchema = z.discriminatedUnion("type", [
   encodedBlobMatcherSchema,
   mcpSecretMatcherSchema,
   mcpServerSourceMatcherSchema,
+  hooksCommandMatcherSchema,
 ]);
 
 const prose = z
@@ -100,7 +106,7 @@ export const ruleSchema = z.strictObject({
   remediation: prose,
   references: z.array(z.url()).min(1, "cite at least one reference"),
   targets: z
-    .array(z.enum(["skill", "mcp-config", "marketplace-manifest"]))
+    .array(z.enum(["skill", "mcp-config", "marketplace-manifest", "slash-command", "hooks-config"]))
     .min(1, "name at least one artifact type"),
   matcher: matcherSchema,
 });

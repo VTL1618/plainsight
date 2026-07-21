@@ -5,6 +5,7 @@ import { discoverArtifacts } from "./discover.js";
 import { runMatcher, type MatcherContext } from "./matchers/index.js";
 import { parseManifest } from "./parse/manifest.js";
 import { parseMcp } from "./parse/mcp.js";
+import { parseSettings } from "./parse/settings.js";
 import { parseSkill } from "./parse/skill.js";
 import { loadRules, type Rule } from "./rules.js";
 import { buildLineIndex, positionAt } from "./text.js";
@@ -71,10 +72,12 @@ export async function scan(root: string, options: ScanOptions = {}): Promise<Sca
  * parsed artifact and produce nothing when parsing failed.
  */
 export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): ArtifactScanResult {
-  const context: MatcherContext = { source, skill: null, mcp: null };
+  const context: MatcherContext = { source, skill: null, mcp: null, settings: null };
   let failure: ParseFailure | undefined;
 
-  if (ref.type === "skill") {
+  if (ref.type === "skill" || ref.type === "slash-command") {
+    // A slash command is a Markdown prompt template with frontmatter, structurally
+    // a skill, so it reuses the skill parser and every skill rule applies to it.
     const parsed = parseSkill(ref, source);
     if (parsed.ok) context.skill = parsed.skill;
     else failure = parsed.failure;
@@ -85,6 +88,10 @@ export function scanArtifact(ref: ArtifactRef, source: string, rules: Rule[]): A
   } else if (ref.type === "marketplace-manifest") {
     const parsed = parseManifest(ref, source);
     if (!parsed.ok) failure = parsed.failure;
+  } else if (ref.type === "hooks-config") {
+    const parsed = parseSettings(ref, source);
+    if (parsed.ok) context.settings = parsed.settings;
+    else failure = parsed.failure;
   }
 
   const lineIndex = buildLineIndex(source);

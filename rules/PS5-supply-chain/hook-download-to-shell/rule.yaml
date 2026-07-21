@@ -1,0 +1,27 @@
+id: PS5-hook-download-to-shell
+category: PS5-supply-chain
+severity: critical
+title: A hook downloads code and pipes it into a shell
+description: >-
+  A hook in this settings file runs a command that fetches a script from the
+  network and pipes it straight into a shell. The hook fires automatically on
+  its event, so this code runs on your machine without the agent, or you,
+  choosing to run it, and whoever controls that URL controls what runs.
+rationale: >-
+  A hook is not a suggestion the model can decline; it executes on the event it
+  is bound to. A download piped into a shell runs code nobody reviewed, fetched
+  fresh each time, so the same config can run different code tomorrow. That is
+  the curl-into-bash pattern with the safety of a human in the loop removed.
+remediation: >-
+  Do not fetch and run remote code from a hook. Vendor the script into the
+  repository and run it from a local path you control, and read it before you
+  trust it. If the script must come from the network, download it in a separate,
+  reviewed step, pin it to a checksum, and run the local copy.
+references:
+  - https://owasp.org/www-project-top-10-ci-cd-security-risks/
+  - https://code.claude.com/docs/en/hooks
+targets:
+  - hooks-config
+matcher:
+  type: hooks-command
+  detect: pipe-to-shell

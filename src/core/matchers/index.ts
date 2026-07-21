@@ -3,10 +3,12 @@ import { matchCommandToken } from "./command-token.js";
 import { matchEncodedBlob } from "./encoded-blob.js";
 import { matchFrontmatterField } from "./frontmatter-field.js";
 import { matchHomoglyph } from "./homoglyph.js";
+import { matchHooksCommand } from "./hooks-command.js";
 import { matchHtmlComment } from "./html-comment.js";
 import { matchMcpSecret } from "./mcp-secret.js";
 import { matchMcpServerSource } from "./mcp-server-source.js";
 import type { ParsedMcp } from "../parse/mcp.js";
+import type { ParsedSettings } from "../parse/settings.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
 import type { MatcherMatch } from "./types.js";
@@ -31,6 +33,7 @@ export interface MatcherContext {
   source: string;
   skill: ParsedSkill | null;
   mcp: ParsedMcp | null;
+  settings: ParsedSettings | null;
 }
 
 export function runMatcher(context: MatcherContext, config: MatcherConfig): MatcherMatch[] {
@@ -55,5 +58,7 @@ export function runMatcher(context: MatcherContext, config: MatcherConfig): Matc
       return context.mcp === null ? [] : matchMcpSecret(context.mcp);
     case "mcp-server-source":
       return context.mcp === null ? [] : matchMcpServerSource(context.mcp, config);
+    case "hooks-command":
+      return context.settings === null ? [] : matchHooksCommand(context.settings, config);
   }
 }
