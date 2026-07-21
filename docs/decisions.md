@@ -114,6 +114,30 @@ A badge for other repositories: a registry or skill author whose tree scans clea
 
 The self-scan workflow's build gate is the scan step's exit code. Uploading the result to the Security tab is a separate, best-effort step marked `continue-on-error: true`. Code scanning is free on public repositories but off on private ones without Advanced Security, and it is never available to fork PRs, so a hard dependency on it would turn a passing scan red for a reason that has nothing to do with the code. The workflow is also a template other people copy into their own repositories, many private, so failing soft on the upload is the right default. The tradeoff: a genuine upload failure on a public repository no longer reddens CI. That is acceptable because the SARIF is schema-validated in tests before it is ever emitted, and the upload carries visibility, not the gate.
 
+## 2026-07-21: MCP config parsing is strict JSON, differential-aware
+
+`.mcp.json` is parsed with strict `JSON.parse` (BOM stripped first). The parser choice is a security decision, the same reasoning as the frontmatter YAML choice: a file the runtime reads leniently (JSONC comments, trailing commas) and we read strictly is a parser differential, so a strict parse that fails becomes a first-class `ParseFailure` rather than a silent skip. Raw matchers scan every byte regardless of parse outcome, so hidden content in a file that defeats the parser is never exempted. A dedicated "JSONC differential" rule (comments the runtime tolerates but we reject) is backlogged, not built.
+
+## 2026-07-21: Named MCP matchers, detection by value shape
+
+Two structured matchers, not a generic json-path matcher, keeping the "specialized matcher, better finding" line. `mcp-secret` reads `env` and `headers` values and flags credentials by value shape (known token prefixes, JWTs, literal Bearer tokens), never by key name, so ordinary config and `${VAR}` references stay quiet. It masks the secret to a short prefix so the credential never lands in SARIF or CI logs. `mcp-server-source` has a `detect` discriminator like `command-token`: `insecure-transport` (remote server over http://, loopback exempt) and `git-source` (launch from github:/git+/.git, published packages exempt).
+
+## 2026-07-21: PS6 rule set, what shipped and what was held back
+
+Shipped: `PS6-inline-secret` (high), `PS6-insecure-transport` (medium), `PS6-git-source` (medium). Two §3 PS6 bullets were held back for lack of an honest signal. Blanket env passthrough has no static marker in the standard `.mcp.json` schema (stdio servers inherit the parent env implicitly, with nothing in the file to flag). Overbroad `allowedTools` is not a field of the standard `.mcp.json`, so a rule on it would match an invented strawman. Both return when a real schema carries the field. Unpinned installs stayed scoped to git sources only, not bare `npx pkg`, on the same corpus evidence that backlogged the PS5 version.
+
+## 2026-07-21: Tool poisoning reuses the raw rules, marketplace parse is raw-only
+
+"PS1 rules applied to the MCP surface" (§3) is implemented by extending the eight raw PS1/PS2 rules' `targets` to `mcp-config` and `marketplace-manifest`, not by duplicating rules. The same injection or hidden-content matcher runs on the new surface; injection in a manifest description or invisible characters in a server name are caught by the code that already catches them in skills. The homoglyph rule is not extended: it reads a parsed frontmatter field, so it is skill-specific. The marketplace manifest is parsed only for JSON validity (same differential discipline) and scanned only by raw rules for now; structured manifest analysis (declared-source vs hosting-repo mismatch) is future work.
+
+## 2026-07-21: eslint ignores .claude/
+
+The eslint flat-config `dist/` and `node_modules/` ignores are root-anchored, so `eslint .` from a repo that contains a git worktree under `.claude/worktrees/` descended into the nested checkout's build output and failed on compiled JS. Adding `.claude/` to the ignore list fixes local runs; CI is unaffected because it checks out a clean tree with no nested worktree.
+
+## Backlog: real MCP configs in the corpus (follow-up)
+
+The false-positive corpus is skills only. Adding one or two real, benign `.mcp.json` files (under the same vendoring policy: permissive license, SOURCES.md, SHA) would exercise the PS6 rules against genuine configs, not just safe fixtures. Held back from Phase 6 because a cleanly licensed primary-source config was not sourced in the session; the safe fixtures and the self-scan carry the false-positive guard until then.
+
 ## Backlog: rule candidates
 
 - **PS2, YAML version differential in frontmatter** (target: later phase). Frontmatter that parses to different values under YAML 1.1 and YAML 1.2 (`no` vs `"no"`, `0o17` vs `017`, duplicate keys) is hidden content in the literal sense: the reviewer's tooling and the agent runtime see different documents. Flag any frontmatter where the two parses disagree.
