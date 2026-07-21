@@ -134,6 +134,10 @@ Shipped: `PS6-inline-secret` (high), `PS6-insecure-transport` (medium), `PS6-git
 
 The eslint flat-config `dist/` and `node_modules/` ignores are root-anchored, so `eslint .` from a repo that contains a git worktree under `.claude/worktrees/` descended into the nested checkout's build output and failed on compiled JS. Adding `.claude/` to the ignore list fixes local runs; CI is unaffected because it checks out a clean tree with no nested worktree.
 
+## 2026-07-21: Fixture and test secrets are clearly synthetic
+
+A value that demonstrates a secret in a fixture or test must match the detector's prefix but never a provider's full token structure. GitHub push protection is enabled on this repo, so a real-shaped token blocks the push. The `mcp-secret` matcher checks only the prefix (`xoxb-`, `ghp_`, and the rest), so a realistic full token adds no coverage and only trips scanners; use an obviously fake value like `xoxb-not-a-real-token`. When a push is blocked on a genuinely fake test string, allowing it through secret scanning is the right resolution, not a history rewrite. History rewrite plus rotation is reserved for a real, working credential.
+
 ## Backlog: real MCP configs in the corpus (follow-up)
 
 The false-positive corpus is skills only. Adding one or two real, benign `.mcp.json` files (under the same vendoring policy: permissive license, SOURCES.md, SHA) would exercise the PS6 rules against genuine configs, not just safe fixtures. Held back from Phase 6 because a cleanly licensed primary-source config was not sourced in the session; the safe fixtures and the self-scan carry the false-positive guard until then.
