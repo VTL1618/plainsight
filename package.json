@@ -1,6 +1,6 @@
 {
   "name": "plainsight",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Static security scanner for AI agent artifacts: skills, MCP configs, and plugin manifests.",
   "license": "MIT",
   "type": "module",
