@@ -29,6 +29,7 @@ targets:
   - mcp-config
   - marketplace-manifest
   - slash-command
+  - hooks-config
 matcher:
   type: unicode-range
   ranges:

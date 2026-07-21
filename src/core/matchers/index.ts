@@ -7,6 +7,7 @@ import { matchHtmlComment } from "./html-comment.js";
 import { matchMcpSecret } from "./mcp-secret.js";
 import { matchMcpServerSource } from "./mcp-server-source.js";
 import type { ParsedMcp } from "../parse/mcp.js";
+import type { ParsedSettings } from "../parse/settings.js";
 import type { ParsedSkill } from "../parse/skill.js";
 import { matchSubstring } from "./substring.js";
 import type { MatcherMatch } from "./types.js";
@@ -31,6 +32,7 @@ export interface MatcherContext {
   source: string;
   skill: ParsedSkill | null;
   mcp: ParsedMcp | null;
+  settings: ParsedSettings | null;
 }
 
 export function runMatcher(context: MatcherContext, config: MatcherConfig): MatcherMatch[] {

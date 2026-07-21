@@ -68,6 +68,10 @@ function classify(name: string, relPath: string): ArtifactType | null {
   if (name === "marketplace.json" && parentDir(relPath) === ".claude-plugin") return "marketplace-manifest";
   // Slash commands are any Markdown file under a .claude/commands/ tree, nesting allowed.
   if (name.endsWith(".md") && underDir(relPath, ".claude/commands")) return "slash-command";
+  // Hooks live in .claude/settings.json and its local override.
+  if ((name === "settings.json" || name === "settings.local.json") && parentDir(relPath) === ".claude") {
+    return "hooks-config";
+  }
   return null;
 }
 

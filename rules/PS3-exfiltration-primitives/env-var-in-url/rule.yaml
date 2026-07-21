@@ -22,5 +22,6 @@ references:
 targets:
   - skill
   - slash-command
+  - hooks-config
 matcher:
   type: url-token

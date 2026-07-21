@@ -76,6 +76,24 @@ describe("discoverArtifacts", () => {
     ]);
   });
 
+  it("finds .claude/settings.json and settings.local.json as hooks-config", async () => {
+    const root = tempTree();
+    mkdirSync(path.join(root, ".claude"), { recursive: true });
+    mkdirSync(path.join(root, "nested/.claude"), { recursive: true });
+    writeFileSync(path.join(root, ".claude/settings.json"), "{}\n");
+    writeFileSync(path.join(root, ".claude/settings.local.json"), "{}\n");
+    writeFileSync(path.join(root, "nested/.claude/settings.json"), "{}\n");
+    writeFileSync(path.join(root, "settings.json"), "{}\n"); // bare, not under .claude
+
+    const refs = await discoverArtifacts(root);
+    const hooks = refs.filter((r) => r.type === "hooks-config");
+    expect(hooks.map((r) => r.relPath)).toEqual([
+      ".claude/settings.json",
+      ".claude/settings.local.json",
+      "nested/.claude/settings.json",
+    ]);
+  });
+
   it("requires the exact name SKILL.md", async () => {
     const root = tempTree();
     mkdirSync(path.join(root, "s"));
